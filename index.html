@@ -1297,6 +1297,11 @@ async function carregarConfigScreen() {
     }
     if (res.escala && res.escala.length) {
       escala = res.escala;
+      // Garante Sábado e Domingo mesmo em planilhas antigas
+      if (!escala.find(e => e.dia === 'Sábado'))
+        escala.push({ dia:'Sábado',  entrada:'08:00', saida:'12:00', ativo:false });
+      if (!escala.find(e => e.dia === 'Domingo'))
+        escala.push({ dia:'Domingo', entrada:'08:00', saida:'12:00', ativo:false });
       localStorage.setItem(ESCALA_KEY, JSON.stringify(escala));
       renderEscala();
     }
