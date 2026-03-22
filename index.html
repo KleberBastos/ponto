@@ -296,6 +296,19 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
       </div>
     </div>
 
+    <!-- Registro passado -->
+    <div class="card" style="padding:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:13px;font-weight:600">Adicionar registro passado</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">Pontos anteriores ao app ou esquecidos</div>
+        </div>
+        <button class="btn btn-ghost" style="width:auto;padding:8px 14px;font-size:13px" onclick="abrirRegistroPassado()">
+          + Adicionar
+        </button>
+      </div>
+    </div>
+
     <!-- Progresso -->
     <div class="card">
       <div class="card-label">Progresso do estágio</div>
@@ -470,6 +483,68 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
   </div>
 </div>
 
+<!-- Modal registro passado -->
+<div class="modal-overlay" id="modal-passado">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📅 Registro passado</div>
+
+    <!-- Tipo de registro -->
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button id="tab-trabalhou" onclick="setTipoPassado('trabalhou')"
+        style="flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--accent);
+        background:rgba(124,109,250,0.15);color:var(--accent2);font-family:inherit;
+        font-size:13px;font-weight:600;cursor:pointer">
+        ✅ Trabalhei
+      </button>
+      <button id="tab-nao-foi" onclick="setTipoPassado('nao_foi')"
+        style="flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);
+        background:transparent;color:var(--text2);font-family:inherit;
+        font-size:13px;font-weight:600;cursor:pointer">
+        ❌ Não fui
+      </button>
+    </div>
+
+    <label>Data</label>
+    <input type="date" id="passado-data" style="margin-bottom:12px">
+
+    <!-- Campos de trabalho -->
+    <div id="passado-campos-trabalho">
+      <div class="row" style="margin-bottom:12px">
+        <div>
+          <label>Entrada</label>
+          <input type="text" id="passado-entrada" placeholder="HH:MM" maxlength="5">
+        </div>
+        <div>
+          <label>Saída</label>
+          <input type="text" id="passado-saida" placeholder="HH:MM" maxlength="5">
+        </div>
+      </div>
+      <label>Atividades realizadas</label>
+      <textarea id="passado-atividades" rows="3" placeholder="O que foi feito neste dia?" style="margin-bottom:6px"></textarea>
+      <p id="passado-ativ-erro" style="font-size:12px;color:var(--red);margin-bottom:10px;display:none">Descreva as atividades.</p>
+    </div>
+
+    <!-- Campos de ausência -->
+    <div id="passado-campos-ausencia" style="display:none">
+      <label>Motivo</label>
+      <select id="passado-motivo" style="margin-bottom:12px">
+        <option value="aula">Aula / compromisso da faculdade</option>
+        <option value="falta_justificada">Falta justificada</option>
+        <option value="falta_nao_justificada">Falta não justificada</option>
+        <option value="feriado">Feriado</option>
+      </select>
+      <label>Observação (opcional)</label>
+      <textarea id="passado-obs" rows="2" placeholder="Detalhe se quiser..." style="margin-bottom:6px"></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-ghost" onclick="fecharRegistroPassado()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarRegistroPassado()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -600,6 +675,8 @@ function salvarSetup() {
   localStorage.setItem('ponto_nome', nome||'Você');
   localStorage.setItem('ponto_meta', meta);
   cfg = { url, nome: nome||'Você', meta };
+  // Esconde setup ANTES de iniciar o app
+  document.getElementById('setup-screen').style.display = 'none';
   iniciarApp();
 }
 
@@ -1076,6 +1153,88 @@ function agendarLembretes() {
 }
 
 // ══════════════════════════════════════════════════
+// REGISTRO PASSADO
+// ══════════════════════════════════════════════════
+let tipoPassado = 'trabalhou';
+
+function abrirRegistroPassado() {
+  tipoPassado = 'trabalhou';
+  document.getElementById('passado-data').value = '';
+  document.getElementById('passado-entrada').value = '';
+  document.getElementById('passado-saida').value = '';
+  document.getElementById('passado-atividades').value = '';
+  document.getElementById('passado-obs').value = '';
+  document.getElementById('passado-ativ-erro').style.display = 'none';
+  setTipoPassado('trabalhou');
+  document.getElementById('modal-passado').classList.add('open');
+}
+
+function fecharRegistroPassado() {
+  document.getElementById('modal-passado').classList.remove('open');
+}
+
+function setTipoPassado(tipo) {
+  tipoPassado = tipo;
+  const btnT = document.getElementById('tab-trabalhou');
+  const btnN = document.getElementById('tab-nao-foi');
+  const camposT = document.getElementById('passado-campos-trabalho');
+  const camposA = document.getElementById('passado-campos-ausencia');
+  if (tipo === 'trabalhou') {
+    btnT.style.border = '1.5px solid var(--accent)';
+    btnT.style.background = 'rgba(124,109,250,0.15)';
+    btnT.style.color = 'var(--accent2)';
+    btnN.style.border = '1.5px solid var(--border)';
+    btnN.style.background = 'transparent';
+    btnN.style.color = 'var(--text2)';
+    camposT.style.display = 'block';
+    camposA.style.display = 'none';
+  } else {
+    btnN.style.border = '1.5px solid var(--red)';
+    btnN.style.background = 'rgba(248,113,113,0.1)';
+    btnN.style.color = 'var(--red)';
+    btnT.style.border = '1.5px solid var(--border)';
+    btnT.style.background = 'transparent';
+    btnT.style.color = 'var(--text2)';
+    camposT.style.display = 'none';
+    camposA.style.display = 'block';
+  }
+}
+
+async function confirmarRegistroPassado() {
+  const data = document.getElementById('passado-data').value;
+  if (!data) { toast('Selecione a data'); return; }
+
+  if (tipoPassado === 'trabalhou') {
+    const entrada    = document.getElementById('passado-entrada').value.trim();
+    const saida      = document.getElementById('passado-saida').value.trim();
+    const atividades = document.getElementById('passado-atividades').value.trim();
+    if (!atividades) { document.getElementById('passado-ativ-erro').style.display='block'; return; }
+    document.getElementById('passado-ativ-erro').style.display = 'none';
+    fecharRegistroPassado();
+    toast('Salvando...');
+    if (entrada) await api({ action:'salvarEntrada', data, hora: entrada });
+    if (saida)   await api({ action:'salvarSaida',   data, hora: saida });
+    await api({ action:'salvarAtividades', data, atividades });
+  } else {
+    const motivo = document.getElementById('passado-motivo').value;
+    const obs    = document.getElementById('passado-obs').value.trim();
+    fecharRegistroPassado();
+    toast('Salvando...');
+    await api({ action:'salvarJustificativa', data, justificativa: obs ? `${motivo}: ${obs}` : motivo, status: motivo });
+  }
+
+  // Invalida cache e atualiza tudo
+  localStorage.removeItem('ponto_registros');
+  registrosTodos = [];
+  toast('✅ Registro salvo!');
+  await sincronizarDaPlanilha();
+  registrosHoje = registrosTodos.find(r => r.data === dataHoje()) || null;
+  atualizarStatusHoje();
+  atualizarProgress();
+  verificarPendentes();
+}
+
+// ══════════════════════════════════════════════════
 // NAVEGAÇÃO
 // ══════════════════════════════════════════════════
 function irPara(s) {
@@ -1083,8 +1242,17 @@ function irPara(s) {
   document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
   document.getElementById('screen-'+s).classList.add('active');
   document.getElementById('nav-'+s).classList.add('active');
+
+  if (s === 'home') {
+    // Sempre rebusca ao voltar para home para refletir edições
+    sincronizarDaPlanilha().then(() => {
+      registrosHoje = registrosTodos.find(r => r.data === dataHoje()) || null;
+      atualizarStatusHoje();
+      atualizarProgress();
+      verificarPendentes();
+    });
+  }
   if (s==='relatorios') {
-    // Define período padrão: mês atual
     if (!document.getElementById('rel-ini').value) {
       const hoje = new Date();
       const ini  = hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0')+'-01';
