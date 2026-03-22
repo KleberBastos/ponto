@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0f1e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ponto">
+<title>Ponto Eletrônico</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Base ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0a0f1e;
+  --bg2:       #111827;
+  --bg3:       #1a2235;
+  --accent:    #7c6dfa;
+  --accent2:   #a78bfa;
+  --green:     #34d399;
+  --red:       #f87171;
+  --yellow:    #fbbf24;
+  --text:      #f1f5f9;
+  --text2:     #94a3b8;
+  --border:    rgba(124,109,250,0.2);
+  --card:      rgba(26,34,53,0.8);
+  --radius:    16px;
+  --safe-top:  env(safe-area-inset-top, 0px);
+  --safe-bot:  env(safe-area-inset-bottom, 0px);
+}
+
+html { height: 100%; }
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+  padding-bottom: calc(80px + var(--safe-bot));
+}
+
+/* ── Background mesh ─────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 20% 20%, rgba(124,109,250,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 80% 80%, rgba(52,211,153,0.06) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── Header ──────────────────────────────────────────── */
+.header {
+  position: sticky; top: 0; z-index: 100;
+  padding: calc(var(--safe-top) + 16px) 20px 16px;
+  background: rgba(10,15,30,0.9);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.header-title { font-size: 18px; font-weight: 700; }
+.header-sub   { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.header-time  {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px; font-weight: 500;
+  color: var(--accent2);
+  letter-spacing: -0.5px;
+}
+
+/* ── Nav ─────────────────────────────────────────────── */
+.nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  padding: 8px 8px calc(8px + var(--safe-bot));
+  background: rgba(10,15,30,0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex; gap: 4px;
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 4px; padding: 10px 4px; border: none; background: none;
+  color: var(--text2); cursor: pointer; border-radius: 12px;
+  transition: all .2s; font-family: inherit; font-size: 10px;
+}
+.nav-btn.active { color: var(--accent2); background: rgba(124,109,250,0.12); }
+.nav-btn svg { width: 22px; height: 22px; }
+
+/* ── Screens ─────────────────────────────────────────── */
+.screen { display: none; padding: 20px 20px 0; position: relative; z-index: 1; }
+.screen.active { display: block; }
+
+/* ── Cards ───────────────────────────────────────────── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  margin-bottom: 16px;
+}
+.card-label {
+  font-size: 11px; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--text2);
+  margin-bottom: 12px;
+}
+
+/* ── Progress bar ────────────────────────────────────── */
+.progress-wrap { margin: 4px 0 12px; }
+.progress-track {
+  height: 8px; background: rgba(255,255,255,0.06);
+  border-radius: 99px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width 1s cubic-bezier(.4,0,.2,1);
+  position: relative;
+}
+.progress-fill::after {
+  content: '';
+  position: absolute; right: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 14px; height: 14px;
+  background: white; border-radius: 50%;
+  box-shadow: 0 0 8px rgba(124,109,250,0.8);
+}
+.progress-labels {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: var(--text2); margin-top: 8px;
+}
+.progress-pct {
+  font-family: 'DM Mono', monospace;
+  font-size: 32px; font-weight: 500;
+  color: var(--accent2);
+  margin: 4px 0;
+}
+
+/* ── Punch buttons ───────────────────────────────────── */
+.punch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.punch-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; padding: 24px 16px;
+  border: 1.5px solid;
+  border-radius: var(--radius);
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all .2s;
+  position: relative; overflow: hidden;
+}
+.punch-btn::before {
+  content: ''; position: absolute; inset: 0;
+  opacity: 0; transition: opacity .2s;
+}
+.punch-btn:active::before { opacity: 1; }
+.punch-btn.entrada {
+  background: rgba(52,211,153,0.08);
+  border-color: rgba(52,211,153,0.3);
+  color: var(--green);
+}
+.punch-btn.entrada::before { background: rgba(52,211,153,0.1); }
+.punch-btn.saida {
+  background: rgba(248,113,113,0.08);
+  border-color: rgba(248,113,113,0.3);
+  color: var(--red);
+}
+.punch-btn.saida::before { background: rgba(248,113,113,0.1); }
+.punch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.punch-btn svg { width: 32px; height: 32px; }
+.punch-time {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px; opacity: .7;
+}
+
+/* ── Status chip ─────────────────────────────────────── */
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 500;
+}
+.chip.ok     { background: rgba(52,211,153,0.15); color: var(--green); }
+.chip.warn   { background: rgba(251,191,36,0.15);  color: var(--yellow); }
+.chip.danger { background: rgba(248,113,113,0.15); color: var(--red); }
+.chip.idle   { background: rgba(148,163,184,0.1);  color: var(--text2); }
+.chip-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+/* ── Textarea ────────────────────────────────────────── */
+textarea, input[type=text], input[type=number], input[type=time], select {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color .2s;
+  -webkit-appearance: none;
+}
+textarea:focus, input:focus, select:focus { border-color: var(--accent); }
+textarea { resize: none; }
+select { cursor: pointer; }
+select option { background: var(--bg2); }
+label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+
+/* ── Buttons ─────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 13px 20px;
+  border-radius: 12px; border: none;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all .2s; width: 100%;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: white;
+}
+.btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+.btn-ghost {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+/* ── Stat grid ───────────────────────────────────────── */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stat-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px;
+}
+.stat-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px; font-weight: 500; color: var(--accent2);
+}
+.stat-lbl { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+/* ── Alert banner ────────────────────────────────────── */
+.alert-banner {
+  background: rgba(251,191,36,0.1);
+  border: 1px solid rgba(251,191,36,0.3);
+  border-radius: var(--radius); padding: 14px;
+  display: flex; gap: 12px; align-items: flex-start;
+  margin-bottom: 16px;
+}
+.alert-icon { font-size: 20px; flex-shrink: 0; }
+.alert-title { font-size: 13px; font-weight: 600; color: var(--yellow); }
+.alert-sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+/* ── History list ────────────────────────────────────── */
+.hist-item {
+  display: flex; align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  gap: 12px;
+}
+.hist-item:last-child { border-bottom: none; }
+.hist-date {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px; color: var(--text2);
+  width: 80px; flex-shrink: 0;
+}
+.hist-info { flex: 1; }
+.hist-horas {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px; font-weight: 500;
+}
+.hist-ativ { font-size: 11px; color: var(--text2); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+
+/* ── Chart bars ──────────────────────────────────────── */
+.chart-wrap { display: flex; align-items: flex-end; gap: 6px; height: 100px; margin-top: 12px; }
+.chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.chart-bar {
+  width: 100%; background: rgba(124,109,250,0.2);
+  border-radius: 6px 6px 0 0; position: relative;
+  transition: height .8s cubic-bezier(.4,0,.2,1);
+  min-height: 4px;
+}
+.chart-bar-fill {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(0deg, var(--accent), var(--accent2));
+  border-radius: 6px 6px 0 0;
+  height: 100%;
+}
+.chart-lbl { font-size: 10px; color: var(--text2); }
+.chart-val { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--accent2); }
+
+/* ── Escala table ────────────────────────────────────── */
+.escala-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.escala-row:last-child { border-bottom: none; }
+.escala-dia { width: 70px; font-size: 13px; font-weight: 500; }
+.escala-time { width: 72px; }
+.escala-toggle {
+  width: 44px; height: 26px; border-radius: 99px;
+  position: relative; cursor: pointer;
+  background: rgba(255,255,255,0.1); border: none;
+  transition: background .2s; flex-shrink: 0;
+}
+.escala-toggle.on { background: var(--accent); }
+.escala-toggle::after {
+  content: ''; position: absolute;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; top: 3px; left: 3px;
+  transition: transform .2s;
+}
+.escala-toggle.on::after { transform: translateX(18px); }
+
+/* ── Modal ───────────────────────────────────────────── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  align-items: flex-end; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2); border-radius: 24px 24px 0 0;
+  padding: 24px 24px calc(24px + var(--safe-bot));
+  width: 100%; max-width: 480px;
+  animation: slideUp .3s cubic-bezier(.4,0,.2,1);
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.15); margin: 0 auto 20px;
+}
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+
+/* ── Toast ───────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: calc(90px + var(--safe-bot)); left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 99px; padding: 10px 20px;
+  font-size: 13px; font-weight: 500;
+  white-space: nowrap; opacity: 0;
+  transition: all .3s; z-index: 300;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Loading ─────────────────────────────────────────── */
+.loading {
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px; color: var(--text2); gap: 10px; font-size: 14px;
+}
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid rgba(124,109,250,0.3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+.row { display: flex; gap: 10px; }
+.row > * { flex: 1; }
+
+/* ── Setup screen ────────────────────────────────────── */
+.setup-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 60px 20px 40px; text-align: center;
+}
+.setup-icon { font-size: 64px; margin-bottom: 24px; }
+.setup-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+.setup-sub { color: var(--text2); font-size: 14px; line-height: 1.6; margin-bottom: 32px; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- SETUP (shown when no API URL configured) -->
+<div id="setup-screen" style="display:none">
+  <div class="setup-wrap">
+    <div class="setup-icon">⚙️</div>
+    <div class="setup-title">Configuração Inicial</div>
+    <div class="setup-sub">Cole abaixo a URL do Google Apps Script para começar. Você pode alterar isso depois nas configurações.</div>
+    <div style="width:100%; margin-bottom:12px">
+      <label>URL do Google Apps Script</label>
+      <input type="text" id="setup-url" placeholder="https://script.google.com/macros/s/..." style="margin-bottom:12px">
+      <label>Seu nome</label>
+      <input type="text" id="setup-nome" placeholder="Ex: Ana" style="margin-bottom:12px">
+      <label>Meta de horas do estágio</label>
+      <input type="number" id="setup-meta" placeholder="Ex: 500" style="margin-bottom:20px">
+      <button class="btn btn-primary" onclick="salvarSetup()">Começar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <div class="header-title" id="header-nome">Olá! 👋</div>
+      <div class="header-sub" id="header-data"></div>
+    </div>
+    <div class="header-time" id="header-clock">00:00</div>
+  </div>
+
+  <!-- ── HOME ── -->
+  <div id="screen-home" class="screen active">
+    <!-- Alertas pendentes -->
+    <div id="alertas-wrap"></div>
+
+    <!-- Status hoje -->
+    <div class="card">
+      <div class="card-label">Hoje</div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px">
+        <div id="status-chip" class="chip idle"><span class="chip-dot"></span> Sem registro</div>
+        <span id="horas-hoje" style="font-family:'DM Mono',monospace; font-size:14px; color:var(--accent2)">0h00</span>
+      </div>
+      <div class="punch-grid">
+        <button class="punch-btn entrada" id="btn-entrada" onclick="registrarPonto('entrada')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          Entrada
+          <span class="punch-time" id="time-entrada">--:--</span>
+        </button>
+        <button class="punch-btn saida" id="btn-saida" onclick="registrarPonto('saida')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 8 8 12 12 16"/><line x1="16" y1="12" x2="8" y2="12"/>
+          </svg>
+          Saída
+          <span class="punch-time" id="time-saida">--:--</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Atividades do dia -->
+    <div class="card">
+      <div class="card-label">Atividades de hoje</div>
+      <textarea id="atividades-txt" rows="3" placeholder="O que você fez hoje no estágio?"></textarea>
+      <button class="btn btn-ghost" style="margin-top:10px" onclick="salvarAtividades()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Salvar atividades
+      </button>
+    </div>
+
+    <!-- Progress -->
+    <div class="card">
+      <div class="card-label">Progresso do estágio</div>
+      <div class="progress-pct" id="prog-pct">0%</div>
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" id="prog-bar" style="width:0%"></div>
+        </div>
+        <div class="progress-labels">
+          <span id="prog-cur">0h</span>
+          <span id="prog-meta">Meta: 0h</span>
+        </div>
+      </div>
+      <div class="stat-grid" style="margin-top:4px">
+        <div class="stat-card">
+          <div class="stat-val" id="stat-semana">0h</div>
+          <div class="stat-lbl">Esta semana</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-mes">0h</div>
+          <div class="stat-lbl">Este mês</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RELATÓRIOS ── -->
+  <div id="screen-relatorios" class="screen">
+    <div class="section-title">Relatórios</div>
+
+    <!-- Selector -->
+    <div class="card" style="padding:14px">
+      <div class="row">
+        <div>
+          <label>Período</label>
+          <select id="rel-tipo" onchange="carregarRelatorio()">
+            <option value="semana">Semanal</option>
+            <option value="mes" selected>Mensal</option>
+          </select>
+        </div>
+        <div>
+          <label>Mês/Ano</label>
+          <input type="month" id="rel-mes" onchange="carregarRelatorio()" style="padding:11px 10px">
+        </div>
+      </div>
+    </div>
+
+    <!-- Totais -->
+    <div class="stat-grid" style="margin-bottom:16px">
+      <div class="stat-card">
+        <div class="stat-val" id="rel-total">0h</div>
+        <div class="stat-lbl">Total período</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="rel-dias">0</div>
+        <div class="stat-lbl">Dias trabalhados</div>
+      </div>
+    </div>
+
+    <!-- Gráfico semanal -->
+    <div class="card">
+      <div class="card-label">Horas por semana</div>
+      <div class="chart-wrap" id="chart-semanas"></div>
+    </div>
+
+    <!-- Lista -->
+    <div class="card">
+      <div class="card-label">Registros</div>
+      <div id="rel-lista"><div class="loading"><div class="spinner"></div> Carregando...</div></div>
+    </div>
+  </div>
+
+  <!-- ── HISTÓRICO ── -->
+  <div id="screen-historico" class="screen">
+    <div class="section-title">Histórico</div>
+    <div class="card">
+      <div id="hist-lista"><div class="loading"><div class="spinner"></div> Carregando...</div></div>
+    </div>
+  </div>
+
+  <!-- ── CONFIGURAÇÕES ── -->
+  <div id="screen-config" class="screen">
+    <div class="section-title">Configurações</div>
+
+    <div class="card">
+      <div class="card-label">Meu perfil</div>
+      <label>Nome</label>
+      <input type="text" id="cfg-nome" style="margin-bottom:12px">
+      <label>Meta total de horas (estágio)</label>
+      <input type="number" id="cfg-meta" style="margin-bottom:12px">
+      <label>URL do Apps Script</label>
+      <input type="text" id="cfg-url" style="margin-bottom:16px">
+      <button class="btn btn-primary" onclick="salvarConfigApp()">Salvar configurações</button>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Minha escala de trabalho</div>
+      <div id="escala-wrap"></div>
+      <button class="btn btn-primary" style="margin-top:14px" onclick="salvarEscala()">Salvar escala</button>
+    </div>
+
+    <div class="card" style="margin-bottom:40px">
+      <div class="card-label">Notificações</div>
+      <p style="font-size:13px; color:var(--text2); margin-bottom:14px">
+        Receba alertas quando esquecer de registrar o ponto nos seus dias de trabalho.
+      </p>
+      <button class="btn btn-ghost" onclick="pedirPermissaoNotificacao()">
+        🔔 Ativar notificações
+      </button>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="irPara('home')" id="nav-home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      Início
+    </button>
+    <button class="nav-btn" onclick="irPara('relatorios')" id="nav-relatorios">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
+      </svg>
+      Relatórios
+    </button>
+    <button class="nav-btn" onclick="irPara('historico')" id="nav-historico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      Histórico
+    </button>
+    <button class="nav-btn" onclick="irPara('config')" id="nav-config">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+      </svg>
+      Config
+    </button>
+  </nav>
+</div>
+
+<!-- Modal justificativa -->
+<div class="modal-overlay" id="modal-justificativa">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📋 Justificativa de ausência</div>
+    <p style="font-size:13px; color:var(--text2); margin-bottom:16px">
+      Você não registrou ponto em <strong id="modal-data-txt"></strong>. O que aconteceu?
+    </p>
+    <div style="margin-bottom:12px">
+      <label>Motivo</label>
+      <select id="modal-motivo" style="margin-bottom:12px">
+        <option value="aula">Aula / compromisso da faculdade</option>
+        <option value="falta_justificada">Falta justificada</option>
+        <option value="falta_nao_justificada">Falta não justificada</option>
+        <option value="feriado">Feriado</option>
+        <option value="fui_trabalhar">Fui trabalhar — esqueci de registrar</option>
+      </select>
+      <label>Observação (opcional)</label>
+      <textarea id="modal-obs" rows="2" placeholder="Detalhe se quiser..."></textarea>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:4px">
+      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarJustificativa()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// CONFIG & STATE
+// ══════════════════════════════════════════════════
+const CFG_KEY    = 'ponto_cfg';
+const ESCALA_KEY = 'ponto_escala';
+let cfg = {
+  url:  localStorage.getItem('ponto_url') || '',
+  nome: localStorage.getItem('ponto_nome') || '',
+  meta: parseFloat(localStorage.getItem('ponto_meta') || '0'),
+};
+let escala = JSON.parse(localStorage.getItem(ESCALA_KEY) || 'null') || [
+  { dia:'Segunda', entrada:'08:00', saida:'12:00', ativo:true },
+  { dia:'Terça',   entrada:'08:00', saida:'12:00', ativo:true },
+  { dia:'Quarta',  entrada:'08:00', saida:'12:00', ativo:true },
+  { dia:'Quinta',  entrada:'08:00', saida:'12:00', ativo:true },
+  { dia:'Sexta',   entrada:'08:00', saida:'12:00', ativo:true },
+  { dia:'Sábado',  entrada:'08:00', saida:'12:00', ativo:false },
+];
+
+let registrosHoje = null;
+let modalDataPendente = null;
+let registrosTodos = [];
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  if (!cfg.url) {
+    document.getElementById('setup-screen').style.display = 'block';
+  } else {
+    iniciarApp();
+  }
+});
+
+function iniciarApp() {
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('setup-screen').style.display = 'none';
+  atualizarHeader();
+  startClock();
+  carregarHome();
+  registrarSW();
+
+  // Data padrão relatório
+  const hoje = new Date();
+  document.getElementById('rel-mes').value =
+    hoje.getFullYear() + '-' + String(hoje.getMonth()+1).padStart(2,'0');
+}
+
+function salvarSetup() {
+  const url  = document.getElementById('setup-url').value.trim();
+  const nome = document.getElementById('setup-nome').value.trim();
+  const meta = parseFloat(document.getElementById('setup-meta').value) || 0;
+  if (!url) return toast('Cole a URL do Apps Script');
+  localStorage.setItem('ponto_url', url);
+  localStorage.setItem('ponto_nome', nome || 'Você');
+  localStorage.setItem('ponto_meta', meta);
+  cfg = { url, nome: nome||'Você', meta };
+  iniciarApp();
+}
+
+// ══════════════════════════════════════════════════
+// CLOCK & HEADER
+// ══════════════════════════════════════════════════
+function startClock() {
+  const tick = () => {
+    const now = new Date();
+    document.getElementById('header-clock').textContent =
+      now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+  };
+  tick();
+  setInterval(tick, 1000);
+}
+
+function atualizarHeader() {
+  const nome = cfg.nome || 'Olá';
+  const hora  = new Date().getHours();
+  const saud  = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+  document.getElementById('header-nome').textContent = `${saud}, ${nome}! 👋`;
+  document.getElementById('header-data').textContent =
+    new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' });
+}
+
+// ══════════════════════════════════════════════════
+// API
+// ══════════════════════════════════════════════════
+async function api(params) {
+  if (!cfg.url) return { error: 'URL não configurada' };
+  const qs = new URLSearchParams(params).toString();
+  const url = cfg.url + '?' + qs;
+  try {
+    const r = await fetch(url, { redirect:'follow' });
+    return await r.json();
+  } catch(e) {
+    return { error: e.toString() };
+  }
+}
+
+async function apiPost(body) {
+  if (!cfg.url) return { error: 'URL não configurada' };
+  try {
+    const r = await fetch(cfg.url, {
+      method:'POST', redirect:'follow',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify(body),
+    });
+    return await r.json();
+  } catch(e) {
+    return { error: e.toString() };
+  }
+}
+
+// ══════════════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════════════
+async function carregarHome() {
+  const hoje = dataHoje();
+
+  // Buscar todos registros
+  const res = await api({ action:'getRegistros' });
+  registrosTodos = res.registros || [];
+
+  registrosHoje = registrosTodos.find(r => r.data === hoje) || null;
+  atualizarStatusHoje();
+  atualizarProgress();
+  verificarPendentes();
+}
+
+function atualizarStatusHoje() {
+  const r = registrosHoje;
+  const chipEl = document.getElementById('status-chip');
+  const horasEl = document.getElementById('horas-hoje');
+  const btnE = document.getElementById('btn-entrada');
+  const btnS = document.getElementById('btn-saida');
+  const timeE = document.getElementById('time-entrada');
+  const timeS = document.getElementById('time-saida');
+
+  if (!r || (!r.entrada && !r.justificativa)) {
+    chipEl.className = 'chip idle';
+    chipEl.innerHTML = '<span class="chip-dot"></span> Sem registro';
+    horasEl.textContent = '0h00';
+    btnE.disabled = false; btnS.disabled = true;
+    timeE.textContent = '--:--'; timeS.textContent = '--:--';
+  } else if (r.entrada && !r.saida) {
+    chipEl.className = 'chip warn';
+    chipEl.innerHTML = '<span class="chip-dot"></span> Em andamento';
+    horasEl.textContent = '...';
+    btnE.disabled = true; btnS.disabled = false;
+    timeE.textContent = r.entrada; timeS.textContent = '--:--';
+  } else if (r.saida) {
+    chipEl.className = 'chip ok';
+    chipEl.innerHTML = '<span class="chip-dot"></span> Completo';
+    horasEl.textContent = formatHoras(r.horas);
+    btnE.disabled = true; btnS.disabled = true;
+    timeE.textContent = r.entrada; timeS.textContent = r.saida;
+  } else if (r.justificativa) {
+    chipEl.className = 'chip idle';
+    chipEl.innerHTML = '<span class="chip-dot"></span> ' + (r.status==='aula'?'Aula':'Justificado');
+    horasEl.textContent = '0h00';
+    btnE.disabled = false; btnS.disabled = true;
+  }
+
+  if (r && r.atividades) {
+    document.getElementById('atividades-txt').value = r.atividades;
+  }
+}
+
+function atualizarProgress() {
+  const meta   = cfg.meta || 0;
+  const total  = registrosTodos.reduce((s,r) => s + (r.horas||0), 0);
+  const pct    = meta > 0 ? Math.min(100, Math.round(total/meta*100)) : 0;
+  const semana = somarHorasSemana(registrosTodos);
+  const mes    = somarHorasMes(registrosTodos);
+
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-bar').style.width  = pct + '%';
+  document.getElementById('prog-cur').textContent  = formatHoras(total);
+  document.getElementById('prog-meta').textContent = 'Meta: ' + meta + 'h';
+  document.getElementById('stat-semana').textContent = formatHoras(semana);
+  document.getElementById('stat-mes').textContent    = formatHoras(mes);
+}
+
+async function verificarPendentes() {
+  const wrap = document.getElementById('alertas-wrap');
+  wrap.innerHTML = '';
+
+  // Verifica dias da escala nos últimos 7 dias sem registro
+  const hoje = new Date();
+  const diasSemana = { 'Segunda':1,'Terça':2,'Quarta':3,'Quinta':4,'Sexta':5,'Sábado':6,'Domingo':0 };
+
+  const pendentes = [];
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(hoje);
+    d.setDate(hoje.getDate() - i);
+    const dow  = d.getDay();
+    const dStr = formatDateStr(d);
+
+    const diaEscala = escala.find(e => e.ativo && diasSemana[e.dia] === dow);
+    if (!diaEscala) continue;
+
+    const reg = registrosTodos.find(r => r.data === dStr);
+    if (!reg || (!reg.entrada && !reg.justificativa)) {
+      pendentes.push({ data: dStr, dia: diaEscala.dia });
+    }
+  }
+
+  pendentes.forEach(p => {
+    const d = p.data.split('-');
+    const label = `${d[2]}/${d[1]}/${d[0]} (${p.dia})`;
+    const el = document.createElement('div');
+    el.className = 'alert-banner';
+    el.innerHTML = `
+      <div class="alert-icon">⚠️</div>
+      <div style="flex:1">
+        <div class="alert-title">Ponto não registrado</div>
+        <div class="alert-sub">Você não registrou presença em <strong>${label}</strong></div>
+        <button onclick="abrirJustificativa('${p.data}')"
+          style="margin-top:8px; padding:6px 14px; border-radius:8px; border:1px solid rgba(251,191,36,.4);
+          background:rgba(251,191,36,.08); color:var(--yellow); font-size:12px;
+          font-family:inherit; cursor:pointer; font-weight:600">
+          Justificar →
+        </button>
+      </div>`;
+    wrap.appendChild(el);
+  });
+}
+
+// ══════════════════════════════════════════════════
+// PONTO
+// ══════════════════════════════════════════════════
+async function registrarPonto(tipo) {
+  const agora = new Date();
+  const hora  = agora.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+  const data  = dataHoje();
+
+  toast(`Registrando ${tipo}...`);
+
+  const action = tipo === 'entrada' ? 'salvarEntrada' : 'salvarSaida';
+  const res = await apiPost({ action, data, hora });
+
+  if (res.error) { toast('❌ Erro: ' + res.error); return; }
+
+  toast(`✅ ${tipo === 'entrada' ? 'Entrada' : 'Saída'} registrada às ${hora}`);
+
+  if (!registrosHoje) registrosHoje = { data, entrada:'', saida:'', horas:0, atividades:'', justificativa:'', status:'' };
+  if (tipo === 'entrada') { registrosHoje.entrada = hora; registrosHoje.status = 'em_andamento'; }
+  else {
+    registrosHoje.saida = hora;
+    registrosHoje.horas = res.horas || 0;
+    registrosHoje.status = 'completo';
+    // Update in array
+    const idx = registrosTodos.findIndex(r => r.data === data);
+    if (idx >= 0) registrosTodos[idx] = { ...registrosTodos[idx], ...registrosHoje };
+    else registrosTodos.push(registrosHoje);
+    atualizarProgress();
+  }
+  atualizarStatusHoje();
+}
+
+async function salvarAtividades() {
+  const ativ = document.getElementById('atividades-txt').value.trim();
+  if (!ativ) return toast('Escreva as atividades primeiro');
+  const res = await apiPost({ action:'salvarAtividades', data:dataHoje(), atividades:ativ });
+  if (res.error) toast('❌ Erro: ' + res.error);
+  else toast('✅ Atividades salvas!');
+}
+
+// ══════════════════════════════════════════════════
+// JUSTIFICATIVA
+// ══════════════════════════════════════════════════
+function abrirJustificativa(data) {
+  modalDataPendente = data;
+  const d = data.split('-');
+  document.getElementById('modal-data-txt').textContent = `${d[2]}/${d[1]}/${d[0]}`;
+  document.getElementById('modal-obs').value = '';
+  document.getElementById('modal-justificativa').classList.add('open');
+}
+
+function fecharModal() {
+  document.getElementById('modal-justificativa').classList.remove('open');
+}
+
+async function confirmarJustificativa() {
+  const motivo = document.getElementById('modal-motivo').value;
+  const obs    = document.getElementById('modal-obs').value;
+  const texto  = obs ? `${motivo}: ${obs}` : motivo;
+
+  const res = await apiPost({
+    action:'salvarJustificativa',
+    data: modalDataPendente,
+    justificativa: texto,
+    status: motivo,
+  });
+
+  fecharModal();
+  if (res.error) toast('❌ Erro: ' + res.error);
+  else { toast('✅ Justificativa salva!'); carregarHome(); }
+}
+
+// ══════════════════════════════════════════════════
+// RELATÓRIOS
+// ══════════════════════════════════════════════════
+async function carregarRelatorio() {
+  document.getElementById('rel-lista').innerHTML = '<div class="loading"><div class="spinner"></div> Carregando...</div>';
+
+  const tipo = document.getElementById('rel-tipo').value;
+  const mes  = document.getElementById('rel-mes').value; // YYYY-MM
+
+  const res = await api({ action:'getRegistros', mes });
+  const regs = (res.registros || []).filter(r => r.horas > 0);
+
+  const total = regs.reduce((s,r) => s + r.horas, 0);
+  const dias  = regs.length;
+
+  document.getElementById('rel-total').textContent = formatHoras(total);
+  document.getElementById('rel-dias').textContent  = dias;
+
+  // Gráfico por semana do mês
+  renderGrafico(regs, mes);
+
+  // Lista
+  const lista = document.getElementById('rel-lista');
+  if (!regs.length) { lista.innerHTML = '<div class="loading" style="color:var(--text2)">Nenhum registro neste período</div>'; return; }
+
+  lista.innerHTML = regs.slice().reverse().map(r => {
+    const d = r.data.split('-');
+    return `
+    <div class="hist-item">
+      <div class="hist-date">${d[2]}/${d[1]}</div>
+      <div class="hist-info">
+        <div style="font-size:13px"><span style="color:var(--green)">${r.entrada}</span> → <span style="color:var(--red)">${r.saida}</span></div>
+        <div class="hist-ativ">${r.atividades || '—'}</div>
+      </div>
+      <div class="hist-horas" style="color:var(--accent2)">${formatHoras(r.horas)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderGrafico(regs, mes) {
+  const semanas = [{lbl:'S1',h:0},{lbl:'S2',h:0},{lbl:'S3',h:0},{lbl:'S4',h:0},{lbl:'S5',h:0}];
+  regs.forEach(r => {
+    const dia = parseInt(r.data.split('-')[2]);
+    const s   = Math.min(4, Math.floor((dia-1)/7));
+    semanas[s].h += r.horas;
+  });
+
+  const max = Math.max(...semanas.map(s=>s.h), 1);
+  const wrap = document.getElementById('chart-semanas');
+  wrap.innerHTML = semanas.filter(s=>s.h>0||true).map(s => `
+    <div class="chart-bar-wrap">
+      <div class="chart-val">${s.h > 0 ? formatHoras(s.h) : ''}</div>
+      <div class="chart-bar" style="height:${Math.round(s.h/max*80)+10}px">
+        <div class="chart-bar-fill"></div>
+      </div>
+      <div class="chart-lbl">${s.lbl}</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// HISTÓRICO
+// ══════════════════════════════════════════════════
+async function carregarHistorico() {
+  const res  = await api({ action:'getRegistros' });
+  const regs = (res.registros || []).slice().reverse();
+  const lista = document.getElementById('hist-lista');
+
+  if (!regs.length) {
+    lista.innerHTML = '<div class="loading" style="color:var(--text2)">Nenhum registro ainda</div>';
+    return;
+  }
+
+  lista.innerHTML = regs.map(r => {
+    const d = r.data.split('-');
+    const statusCls = r.status==='completo' ? 'ok' : r.status==='em_andamento' ? 'warn' : 'idle';
+    return `
+    <div class="hist-item">
+      <div class="hist-date">${d[2]}/${d[1]}/${d[0].slice(2)}</div>
+      <div class="hist-info">
+        <div style="font-size:12px">
+          <span class="chip ${statusCls}" style="padding:2px 8px; font-size:11px">
+            <span class="chip-dot"></span>
+            ${r.status==='completo'?'Completo':r.status==='em_andamento'?'Em andamento':r.justificativa?'Justificado':'Sem registro'}
+          </span>
+        </div>
+        ${r.entrada ? `<div style="font-size:12px; color:var(--text2); margin-top:4px">${r.entrada} → ${r.saida||'...'}</div>` : ''}
+        ${r.atividades ? `<div class="hist-ativ">${r.atividades}</div>` : ''}
+        ${r.justificativa ? `<div class="hist-ativ" style="color:var(--yellow)">${r.justificativa}</div>` : ''}
+      </div>
+      <div class="hist-horas">${r.horas > 0 ? formatHoras(r.horas) : '-'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════
+function carregarConfigScreen() {
+  document.getElementById('cfg-nome').value = cfg.nome || '';
+  document.getElementById('cfg-meta').value = cfg.meta || '';
+  document.getElementById('cfg-url').value  = cfg.url  || '';
+  renderEscala();
+}
+
+function renderEscala() {
+  const wrap = document.getElementById('escala-wrap');
+  wrap.innerHTML = escala.map((e, i) => `
+    <div class="escala-row">
+      <div class="escala-dia">${e.dia}</div>
+      <div class="escala-time">
+        <input type="time" value="${e.entrada}" id="esc-e-${i}" style="padding:8px 8px; font-size:13px">
+      </div>
+      <div class="escala-time">
+        <input type="time" value="${e.saida}" id="esc-s-${i}" style="padding:8px 8px; font-size:13px">
+      </div>
+      <button class="escala-toggle ${e.ativo?'on':''}" id="esc-t-${i}" onclick="toggleEscala(${i})"></button>
+    </div>`).join('');
+}
+
+function toggleEscala(i) {
+  escala[i].ativo = !escala[i].ativo;
+  document.getElementById(`esc-t-${i}`).className = 'escala-toggle ' + (escala[i].ativo?'on':'');
+}
+
+async function salvarEscala() {
+  // Coletar valores dos inputs
+  escala = escala.map((e, i) => ({
+    ...e,
+    entrada: document.getElementById(`esc-e-${i}`).value || e.entrada,
+    saida:   document.getElementById(`esc-s-${i}`).value || e.saida,
+  }));
+  localStorage.setItem(ESCALA_KEY, JSON.stringify(escala));
+
+  const res = await apiPost({ action:'salvarEscala', escala });
+  if (res.error) toast('❌ Erro: ' + res.error);
+  else toast('✅ Escala salva!');
+}
+
+async function salvarConfigApp() {
+  const nome = document.getElementById('cfg-nome').value.trim();
+  const meta = parseFloat(document.getElementById('cfg-meta').value) || 0;
+  const url  = document.getElementById('cfg-url').value.trim();
+
+  cfg.nome = nome; cfg.meta = meta; cfg.url = url;
+  localStorage.setItem('ponto_url', url);
+  localStorage.setItem('ponto_nome', nome);
+  localStorage.setItem('ponto_meta', meta);
+
+  await apiPost({ action:'salvarConfig', chave:'nome',      valor:nome });
+  await apiPost({ action:'salvarConfig', chave:'meta_horas', valor:meta });
+
+  atualizarHeader();
+  toast('✅ Configurações salvas!');
+}
+
+// ══════════════════════════════════════════════════
+// NOTIFICAÇÕES & SERVICE WORKER
+// ══════════════════════════════════════════════════
+async function registrarSW() {
+  if ('serviceWorker' in navigator) {
+    try {
+      await navigator.serviceWorker.register('./sw.js');
+      agendarLembretes();
+    } catch(e) { console.warn('SW:', e); }
+  }
+}
+
+async function pedirPermissaoNotificacao() {
+  if (!('Notification' in window)) { toast('Notificações não suportadas neste browser'); return; }
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    toast('✅ Notificações ativadas!');
+    agendarLembretes();
+  } else {
+    toast('❌ Permissão negada');
+  }
+}
+
+function agendarLembretes() {
+  if (Notification.permission !== 'granted') return;
+  const sw = navigator.serviceWorker.controller;
+  if (!sw) return;
+
+  const diasSemana = { 'Segunda':1,'Terça':2,'Quarta':3,'Quinta':4,'Sexta':5,'Sábado':6,'Domingo':0 };
+  const hoje = new Date();
+  const dow  = hoje.getDay();
+
+  escala.forEach(e => {
+    if (!e.ativo) return;
+    if (diasSemana[e.dia] !== dow) return;
+
+    // Lembrete de entrada
+    const [eh, em] = e.entrada.split(':').map(Number);
+    const entradaTime = new Date(hoje);
+    entradaTime.setHours(eh, em + 10, 0); // 10min após horário de entrada
+    if (entradaTime > hoje) {
+      sw.postMessage({
+        type:'SCHEDULE_NOTIFICATION',
+        title:'⏱ Ponto de entrada!',
+        body:`Não esqueça de registrar sua entrada (prevista ${e.entrada})`,
+        delay: entradaTime - hoje,
+      });
+    }
+
+    // Lembrete de saída
+    const [sh, sm] = e.saida.split(':').map(Number);
+    const saidaTime = new Date(hoje);
+    saidaTime.setHours(sh, sm + 10, 0);
+    if (saidaTime > hoje) {
+      sw.postMessage({
+        type:'SCHEDULE_NOTIFICATION',
+        title:'🏁 Ponto de saída!',
+        body:`Não esqueça de registrar sua saída (prevista ${e.saida})`,
+        delay: saidaTime - hoje,
+      });
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ══════════════════════════════════════════════════
+function irPara(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + screen).classList.add('active');
+  document.getElementById('nav-' + screen).classList.add('active');
+
+  if (screen === 'relatorios') carregarRelatorio();
+  if (screen === 'historico')  carregarHistorico();
+  if (screen === 'config')     carregarConfigScreen();
+}
+
+// ══════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════
+function dataHoje() {
+  return formatDateStr(new Date());
+}
+
+function formatDateStr(d) {
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
+}
+
+function formatHoras(h) {
+  const horas = Math.floor(h);
+  const mins  = Math.round((h - horas) * 60);
+  return `${horas}h${String(mins).padStart(2,'0')}`;
+}
+
+function somarHorasSemana(regs) {
+  const hoje = new Date();
+  const dow  = hoje.getDay();
+  const ini  = new Date(hoje); ini.setDate(hoje.getDate() - (dow === 0 ? 6 : dow - 1));
+  const fim  = new Date(hoje);
+  return regs
+    .filter(r => { const d = new Date(r.data); return d >= ini && d <= fim; })
+    .reduce((s,r) => s + (r.horas||0), 0);
+}
+
+function somarHorasMes(regs) {
+  const hoje = new Date();
+  const mes  = hoje.getFullYear() + '-' + String(hoje.getMonth()+1).padStart(2,'0');
+  return regs.filter(r => r.data.startsWith(mes)).reduce((s,r) => s + (r.horas||0), 0);
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
