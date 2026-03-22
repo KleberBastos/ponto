@@ -524,45 +524,71 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function iniciarApp() {
-  showLoading('Conectando à planilha...');
   document.getElementById('app').style.display = 'block';
   atualizarHeader(); startClock(); registrarSW();
 
-  setLoadingMsg('Buscando configurações...');
-  await sincronizarDaPlanilha();
+  // ── Carrega cache local imediatamente (percepção instantânea) ──
+  const cachedRegistros = localStorage.getItem('ponto_registros');
+  const cachedEscala    = localStorage.getItem(ESCALA_KEY);
 
-  setLoadingMsg('Carregando registros...');
-  await carregarHome();
-
-  hideLoading();
+  if (cachedRegistros) {
+    registrosTodos = JSON.parse(cachedRegistros);
+    registrosHoje  = registrosTodos.find(r => r.data === dataHoje()) || null;
+    atualizarStatusHoje();
+    atualizarProgress();
+    verificarPendentes();
+    // Mostra o app imediatamente sem loading
+    hideLoading();
+    // Atualiza em background silenciosamente
+    sincronizarDaPlanilha().then(() => {
+      registrosHoje = registrosTodos.find(r => r.data === dataHoje()) || null;
+      atualizarStatusHoje();
+      atualizarProgress();
+      verificarPendentes();
+    });
+  } else {
+    // Primeiro acesso — sem cache, precisa mostrar loading
+    showLoading('Conectando à planilha...');
+    setLoadingMsg('Buscando seus dados...');
+    await sincronizarDaPlanilha();
+    registrosHoje = registrosTodos.find(r => r.data === dataHoje()) || null;
+    atualizarStatusHoje();
+    atualizarProgress();
+    verificarPendentes();
+    hideLoading();
+  }
 }
 
 async function sincronizarDaPlanilha() {
-  // Puxa config (nome, meta)
-  try {
-    const resCfg = await api({ action:'getConfig' });
-    if (resCfg.config && !resCfg.error) {
-      if (resCfg.config.nome && resCfg.config.nome !== 'Estagiária') {
-        cfg.nome = resCfg.config.nome;
-        localStorage.setItem('ponto_nome', cfg.nome);
-      }
-      const metaPlani = parseFloat(resCfg.config.meta_horas);
-      if (metaPlani && metaPlani !== 500) {
-        cfg.meta = metaPlani;
-        localStorage.setItem('ponto_meta', cfg.meta);
-      }
-      atualizarHeader();
-    }
-  } catch(e) {}
+  // Uma única chamada busca config + escala + registros de uma vez
+  const res = await api({ action: 'getInicial' });
+  if (res.error) return;
 
-  // Puxa escala
-  try {
-    const resEsc = await api({ action:'getEscala' });
-    if (resEsc.escala && resEsc.escala.length && !resEsc.error) {
-      escala = resEsc.escala;
-      localStorage.setItem(ESCALA_KEY, JSON.stringify(escala));
+  // Config
+  if (res.config) {
+    if (res.config.nome) {
+      cfg.nome = res.config.nome;
+      localStorage.setItem('ponto_nome', cfg.nome);
     }
-  } catch(e) {}
+    const metaPlani = parseFloat(res.config.meta_horas);
+    if (metaPlani) {
+      cfg.meta = metaPlani;
+      localStorage.setItem('ponto_meta', cfg.meta);
+    }
+    atualizarHeader();
+  }
+
+  // Escala
+  if (res.escala && res.escala.length) {
+    escala = res.escala;
+    localStorage.setItem(ESCALA_KEY, JSON.stringify(escala));
+  }
+
+  // Registros — já vêm junto, sem chamada extra
+  if (res.registros) {
+    registrosTodos = res.registros;
+    localStorage.setItem('ponto_registros', JSON.stringify(registrosTodos));
+  }
 }
 
 function salvarSetup() {
@@ -611,8 +637,18 @@ async function api(params) {
 // HOME
 // ══════════════════════════════════════════════════
 async function carregarHome() {
+  // Se já tem dados em memória, usa direto
+  if (registrosTodos.length > 0) {
+    registrosHoje = registrosTodos.find(r => r.data === dataHoje()) || null;
+    atualizarStatusHoje();
+    atualizarProgress();
+    verificarPendentes();
+    return;
+  }
+  // Sem dados em memória — busca da planilha
   const res = await api({ action:'getRegistros' });
   registrosTodos = res.registros || [];
+  localStorage.setItem('ponto_registros', JSON.stringify(registrosTodos));
   registrosHoje  = registrosTodos.find(r => r.data === dataHoje()) || null;
   atualizarStatusHoje();
   atualizarProgress();
@@ -782,6 +818,9 @@ async function confirmarEdicao() {
   if (res.error) { toast('❌ Erro: ' + res.error); return; }
 
   toast('✅ Registro atualizado!');
+  // Invalida cache para forçar busca atualizada
+  localStorage.removeItem('ponto_registros');
+  registrosTodos = [];
   await carregarHistorico();
   const ini = document.getElementById('rel-ini').value;
   const fim = document.getElementById('rel-fim').value;
@@ -796,24 +835,28 @@ async function carregarRelatorio() {
   const fim = document.getElementById('rel-fim').value;
   if (!ini || !fim) return;
 
-  document.getElementById('rel-lista').innerHTML = '<div class="loading"><div class="spinner"></div> Carregando...</div>';
+  // Renderiza imediatamente com dados em memória
+  _renderRelatorio(ini, fim, registrosTodos);
 
-  const res  = await api({ action:'getRegistros' });
-  const todos = res.registros || [];
+  // Atualiza em background e re-renderiza se houver mudanças
+  const res = await api({ action:'getRegistros' });
+  if (res.registros) {
+    const novos = JSON.stringify(res.registros);
+    if (novos !== JSON.stringify(registrosTodos)) {
+      registrosTodos = res.registros;
+      localStorage.setItem('ponto_registros', JSON.stringify(registrosTodos));
+      _renderRelatorio(ini, fim, registrosTodos);
+    }
+  }
+}
 
-  // Filtra pelo período
+function _renderRelatorio(ini, fim, todos) {
   const regs = todos.filter(r => r.horas > 0 && r.data >= ini && r.data <= fim);
-
   document.getElementById('rel-total').textContent = formatHoras(regs.reduce((s,r)=>s+r.horas,0));
   document.getElementById('rel-dias').textContent  = regs.length;
   renderGrafico(regs);
-
   const lista = document.getElementById('rel-lista');
-  if (!regs.length) {
-    lista.innerHTML = '<div class="loading" style="color:var(--text2)">Nenhum registro neste período</div>';
-    return;
-  }
-
+  if (!regs.length) { lista.innerHTML='<div class="loading" style="color:var(--text2)">Nenhum registro neste período</div>'; return; }
   lista.innerHTML = regs.slice().reverse().map(r => {
     const [a,m,d] = r.data.split('-');
     return `<div class="hist-item">
@@ -869,16 +912,25 @@ function atualizarHintsRelatorio() {
 // HISTÓRICO
 // ══════════════════════════════════════════════════
 async function carregarHistorico() {
-  const res  = await api({ action:'getRegistros' });
-  registrosTodos = res.registros || [];
-  const regs = registrosTodos.slice().reverse();
-  const lista = document.getElementById('hist-lista');
+  // Renderiza imediatamente com cache
+  _renderHistorico(registrosTodos);
 
-  if (!regs.length) {
-    lista.innerHTML = '<div class="loading" style="color:var(--text2)">Nenhum registro ainda</div>';
-    return;
+  // Atualiza em background
+  const res = await api({ action:'getRegistros' });
+  if (res.registros) {
+    const novos = JSON.stringify(res.registros);
+    if (novos !== JSON.stringify(registrosTodos)) {
+      registrosTodos = res.registros;
+      localStorage.setItem('ponto_registros', JSON.stringify(registrosTodos));
+      _renderHistorico(registrosTodos);
+    }
   }
+}
 
+function _renderHistorico(todos) {
+  const regs  = todos.slice().reverse();
+  const lista = document.getElementById('hist-lista');
+  if (!regs.length) { lista.innerHTML='<div class="loading" style="color:var(--text2)">Nenhum registro ainda</div>'; return; }
   lista.innerHTML = regs.map(r => {
     const [a,m,d] = r.data.split('-');
     const cls   = r.status==='completo'?'ok':r.status==='em_andamento'?'warn':'idle';
@@ -903,36 +955,25 @@ async function carregarHistorico() {
 // CONFIG
 // ══════════════════════════════════════════════════
 async function carregarConfigScreen() {
-  // Preenche com o que está em memória enquanto busca da planilha
+  // Mostra valores em memória imediatamente
   document.getElementById('cfg-nome').value = cfg.nome || '';
   document.getElementById('cfg-meta').value = cfg.meta || '';
   document.getElementById('cfg-url').value  = cfg.url  || '';
   renderEscala();
 
-  // Busca dados atualizados da planilha
+  // Atualiza em background com uma única chamada
   try {
-    const resCfg = await api({ action:'getConfig' });
-    if (resCfg.config && !resCfg.error) {
-      if (resCfg.config.nome) {
-        cfg.nome = resCfg.config.nome;
-        localStorage.setItem('ponto_nome', cfg.nome);
-        document.getElementById('cfg-nome').value = cfg.nome;
-      }
-      const metaPlani = parseFloat(resCfg.config.meta_horas);
-      if (metaPlani) {
-        cfg.meta = metaPlani;
-        localStorage.setItem('ponto_meta', cfg.meta);
-        document.getElementById('cfg-meta').value = cfg.meta;
-      }
+    const res = await api({ action:'getInicial' });
+    if (res.error) return;
+    if (res.config) {
+      if (res.config.nome) { cfg.nome = res.config.nome; localStorage.setItem('ponto_nome', cfg.nome); document.getElementById('cfg-nome').value = cfg.nome; }
+      const m = parseFloat(res.config.meta_horas);
+      if (m) { cfg.meta = m; localStorage.setItem('ponto_meta', m); document.getElementById('cfg-meta').value = m; }
     }
-  } catch(e) {}
-
-  try {
-    const resEsc = await api({ action:'getEscala' });
-    if (resEsc.escala && resEsc.escala.length && !resEsc.error) {
-      escala = resEsc.escala;
+    if (res.escala && res.escala.length) {
+      escala = res.escala;
       localStorage.setItem(ESCALA_KEY, JSON.stringify(escala));
-      renderEscala(); // re-renderiza com dados da planilha
+      renderEscala();
     }
   } catch(e) {}
 }
