@@ -973,13 +973,18 @@ function _renderRelatorio(ini, fim, todos) {
   const regs = todos.filter(r => r.horas > 0 && r.data >= ini && r.data <= fim);
   const totalRealizado = regs.reduce((s,r) => s+r.horas, 0);
 
-  // ── Calcula semanas do período ──────────────────────────
-  // Começa sempre na segunda-feira da semana da data inicial
-  const iniDate = new Date(ini + 'T00:00:00');
+  // ── Primeiro registro com horas no período ──────────────
+  // Semanas só contam a partir da semana do primeiro ponto batido
+  const todosComHoras = todos.filter(r => r.horas > 0).map(r => r.data).sort();
+  const primeiroPonto = todosComHoras.length ? todosComHoras[0] : ini;
+
+  // Começa na segunda-feira da semana do primeiro ponto (ou da data inicial, o que for mais tarde)
+  const dataInicioBanco = primeiroPonto > ini ? primeiroPonto : ini;
+  const iniDate = new Date(dataInicioBanco + 'T00:00:00');
   const fimDate = new Date(fim + 'T00:00:00');
   const hoje    = new Date(); hoje.setHours(0,0,0,0);
 
-  // Recua até a segunda-feira
+  // Recua até a segunda-feira da semana do primeiro ponto
   const dow = iniDate.getDay();
   const seg = new Date(iniDate);
   seg.setDate(iniDate.getDate() - (dow === 0 ? 6 : dow - 1));
@@ -987,14 +992,14 @@ function _renderRelatorio(ini, fim, todos) {
   const semanas = [];
   let cur = new Date(seg);
   while (cur <= fimDate) {
-    const semIni = new Date(cur);
-    const semFim = new Date(cur); semFim.setDate(cur.getDate() + 6);
+    const semIni    = new Date(cur);
+    const semFim    = new Date(cur); semFim.setDate(cur.getDate() + 6);
     const semFimReal = semFim < fimDate ? semFim : fimDate;
     semanas.push({ ini: new Date(semIni), fim: new Date(semFimReal) });
     cur.setDate(cur.getDate() + 7);
   }
 
-  // Total esperado: todas as semanas × 20h (independente de aula ou não)
+  // Total esperado: semanas desde o primeiro ponto × 20h
   const totalEsperado = semanas.length * META_SEMANAL;
   const saldoGeral    = totalRealizado - totalEsperado;
 
@@ -1017,12 +1022,10 @@ function _renderRelatorio(ini, fim, todos) {
     const saldo = hSem - META_SEMANAL;
     saldoAcum  += saldo;
 
-    // Semana atual
-    const isAtual = s.ini <= hoje && hoje <= s.fim;
-
-    const saldoCls  = saldo  > 0 ? 'saldo-pos' : saldo  < 0 ? 'saldo-neg' : 'saldo-zero';
+    const isAtual   = s.ini <= hoje && hoje <= s.fim;
+    const saldoCls  = saldo     > 0 ? 'saldo-pos' : saldo     < 0 ? 'saldo-neg' : 'saldo-zero';
     const acumCls   = saldoAcum > 0 ? 'saldo-pos' : saldoAcum < 0 ? 'saldo-neg' : 'saldo-zero';
-    const saldoStr  = (saldo  >= 0 ? '+' : '') + formatHoras(Math.abs(saldo));
+    const saldoStr  = (saldo     >= 0 ? '+' : '') + formatHoras(Math.abs(saldo));
     const acumStr   = (saldoAcum >= 0 ? '+' : '') + formatHoras(Math.abs(saldoAcum));
 
     return `<tr class="${isAtual ? 'semana-atual' : ''}">
