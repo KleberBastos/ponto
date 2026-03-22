@@ -58,16 +58,9 @@ body::before {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
 }
 .header-left { min-width: 0; flex: 1; }
-.header-title {
-  font-size: clamp(13px, 4vw, 17px); font-weight: 700;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
+.header-title { font-size: clamp(13px,4vw,17px); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .header-sub  { font-size: 11px; color: var(--text2); margin-top: 2px; }
-.header-time {
-  font-family: 'DM Mono', monospace;
-  font-size: clamp(18px, 5vw, 24px); font-weight: 500;
-  color: var(--accent2); letter-spacing: -0.5px; flex-shrink: 0;
-}
+.header-time { font-family: 'DM Mono', monospace; font-size: clamp(18px,5vw,24px); font-weight: 500; color: var(--accent2); letter-spacing: -0.5px; flex-shrink: 0; }
 
 /* ── Nav ── */
 .nav {
@@ -80,8 +73,7 @@ body::before {
   flex: 1; display: flex; flex-direction: column; align-items: center;
   gap: 3px; padding: 8px 2px; border: none; background: none;
   color: var(--text2); cursor: pointer; border-radius: 12px;
-  transition: all .2s; font-family: inherit;
-  font-size: clamp(9px, 2.5vw, 11px);
+  transition: all .2s; font-family: inherit; font-size: clamp(9px,2.5vw,11px);
   -webkit-tap-highlight-color: transparent;
 }
 .nav-btn.active { color: var(--accent2); background: rgba(124,109,250,0.12); }
@@ -92,28 +84,13 @@ body::before {
 .screen.active { display: block; }
 
 /* ── Cards ── */
-.card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px;
-  backdrop-filter: blur(10px); margin-bottom: 14px;
-}
-.card-label {
-  font-size: 10px; text-transform: uppercase;
-  letter-spacing: 1.5px; color: var(--text2); margin-bottom: 12px;
-}
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; backdrop-filter: blur(10px); margin-bottom: 14px; }
+.card-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text2); margin-bottom: 12px; }
 
 /* ── Progress ── */
 .progress-track { height: 8px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
-.progress-fill {
-  height: 100%; border-radius: 99px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  transition: width 1s cubic-bezier(.4,0,.2,1); position: relative;
-}
-.progress-fill::after {
-  content: ''; position: absolute; right: 0; top: 50%; transform: translateY(-50%);
-  width: 14px; height: 14px; background: white; border-radius: 50%;
-  box-shadow: 0 0 8px rgba(124,109,250,0.8);
-}
+.progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 1s cubic-bezier(.4,0,.2,1); position: relative; }
+.progress-fill::after { content: ''; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; background: white; border-radius: 50%; box-shadow: 0 0 8px rgba(124,109,250,0.8); }
 .progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text2); margin-top: 8px; }
 .progress-pct { font-family: 'DM Mono', monospace; font-size: 30px; font-weight: 500; color: var(--accent2); margin: 4px 0 8px; }
 
@@ -131,7 +108,7 @@ body::before {
 .punch-btn.entrada { background: rgba(52,211,153,0.08); border-color: rgba(52,211,153,0.3); color: var(--green); }
 .punch-btn.entrada::before { background: rgba(52,211,153,0.1); }
 .punch-btn.saida   { background: rgba(248,113,113,0.08); border-color: rgba(248,113,113,0.3); color: var(--red); }
-.punch-btn.saida::before   { background: rgba(248,113,113,0.1); }
+.punch-btn.saida::before { background: rgba(248,113,113,0.1); }
 .punch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .punch-btn svg { width: 30px; height: 30px; }
 .punch-time { font-family: 'DM Mono', monospace; font-size: 12px; opacity: .7; }
@@ -143,38 +120,26 @@ body::before {
 .chip.idle { background: rgba(148,163,184,0.1);  color: var(--text2); }
 .chip-dot  { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 
-/* ── Inputs globais ── */
-textarea,
-input[type=text],
-input[type=number],
-input[type=time],
-input[type=month],
-select {
+/* ── Inputs ── */
+textarea, input[type=text], input[type=number], input[type=time], input[type=date], input[type=month], select {
   width: 100%; min-width: 0;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border); border-radius: 10px;
-  color: var(--text); font-family: inherit;
-  font-size: 15px; padding: 11px 12px;
-  outline: none; transition: border-color .2s;
-  -webkit-appearance: none; appearance: none;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px;
+  color: var(--text); font-family: inherit; font-size: 15px; padding: 11px 12px;
+  outline: none; transition: border-color .2s; -webkit-appearance: none; appearance: none;
 }
 textarea:focus, input:focus, select:focus { border-color: var(--accent); }
 textarea { resize: none; }
 select { cursor: pointer; }
 select option { background: var(--bg2); }
 label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; }
+.hint { font-size: 11px; color: var(--text2); margin-top: 4px; opacity: .8; }
 
 /* ── Buttons ── */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: 8px; padding: 13px 20px; border-radius: 12px; border: none;
-  font-family: inherit; font-size: 15px; font-weight: 600;
-  cursor: pointer; transition: all .2s; width: 100%;
-  -webkit-tap-highlight-color: transparent;
-}
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 20px; border-radius: 12px; border: none; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; transition: all .2s; width: 100%; -webkit-tap-highlight-color: transparent; }
 .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; }
 .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
 .btn-ghost { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text); }
+.btn-sm { padding: 7px 14px; font-size: 12px; border-radius: 8px; width: auto; }
 
 /* ── Stats ── */
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -183,25 +148,25 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
 .stat-lbl  { font-size: 11px; color: var(--text2); margin-top: 3px; }
 
 /* ── Alert ── */
-.alert-banner {
-  background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3);
-  border-radius: var(--radius); padding: 14px;
-  display: flex; gap: 10px; align-items: flex-start; margin-bottom: 14px;
-}
+.alert-banner { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: var(--radius); padding: 14px; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 14px; }
 .alert-icon  { font-size: 18px; flex-shrink: 0; padding-top: 1px; }
 .alert-title { font-size: 13px; font-weight: 600; color: var(--yellow); }
 .alert-sub   { font-size: 12px; color: var(--text2); margin-top: 3px; }
 
-/* ── History ── */
-.hist-item {
-  display: flex; align-items: center;
-  padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 10px;
-}
+/* ── History items ── */
+.hist-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 10px; }
 .hist-item:last-child { border-bottom: none; }
 .hist-date  { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text2); width: 68px; flex-shrink: 0; }
 .hist-info  { flex: 1; min-width: 0; }
 .hist-horas { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; flex-shrink: 0; }
 .hist-ativ  { font-size: 11px; color: var(--text2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.edit-btn {
+  background: rgba(124,109,250,0.12); border: 1px solid rgba(124,109,250,0.25);
+  color: var(--accent2); border-radius: 8px; padding: 5px 10px;
+  font-size: 11px; font-family: inherit; font-weight: 600;
+  cursor: pointer; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
 
 /* ── Chart ── */
 .chart-wrap { display: flex; align-items: flex-end; gap: 6px; height: 90px; margin-top: 10px; }
@@ -211,85 +176,27 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
 .chart-lbl { font-size: 10px; color: var(--text2); }
 .chart-val { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--accent2); }
 
-/* ════════════════════════════════════════════
-   ESCALA — grid responsivo de 4 colunas
-   Col 1: nome fixo | Col 2-3: inputs flex | Col 4: toggle fixo
-════════════════════════════════════════════ */
-.escala-grid {
-  display: grid;
-  grid-template-columns: minmax(60px, auto) 1fr 1fr 44px;
-  align-items: center;
-  gap: 8px 8px;
-  width: 100%;
-}
-.escala-header-cell {
-  font-size: 10px; text-transform: uppercase;
-  letter-spacing: 1px; color: var(--text2);
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-}
-.escala-sep {
-  grid-column: 1 / -1;
-  height: 1px; background: rgba(255,255,255,0.05);
-}
-.escala-dia {
-  font-size: 13px; font-weight: 600;
-  padding: 2px 0; white-space: nowrap;
-}
-/* inputs de hora da escala — campo de texto simples HH:MM, sem picker nativo */
-.hora-input {
-  font-size: 15px !important;
-  font-family: 'DM Mono', monospace !important;
-  padding: 9px 4px !important;
-  text-align: center !important;
-  min-width: 0; width: 100%;
-  letter-spacing: 1px;
-}
-/* toggle */
-.escala-toggle {
-  width: 44px; height: 26px; border-radius: 99px;
-  flex-shrink: 0; position: relative; cursor: pointer;
-  background: rgba(255,255,255,0.1); border: none;
-  transition: background .2s;
-  -webkit-tap-highlight-color: transparent;
-  justify-self: end;
-}
+/* ── Escala grid ── */
+.escala-grid { display: grid; grid-template-columns: minmax(60px,auto) 1fr 1fr 44px; align-items: center; gap: 8px; width: 100%; }
+.escala-header-cell { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+.escala-sep { grid-column: 1/-1; height: 1px; background: rgba(255,255,255,0.05); }
+.escala-dia { font-size: 13px; font-weight: 600; padding: 2px 0; white-space: nowrap; }
+.escala-grid input[type=text] { font-size: 14px; padding: 9px 6px; text-align: center; min-width: 0; width: 100%; }
+.escala-toggle { width: 44px; height: 26px; border-radius: 99px; flex-shrink: 0; position: relative; cursor: pointer; background: rgba(255,255,255,0.1); border: none; transition: background .2s; -webkit-tap-highlight-color: transparent; justify-self: end; }
 .escala-toggle.on { background: var(--accent); }
-.escala-toggle::after {
-  content: ''; position: absolute;
-  width: 20px; height: 20px; border-radius: 50%;
-  background: white; top: 3px; left: 3px;
-  transition: transform .2s;
-}
+.escala-toggle::after { content: ''; position: absolute; width: 20px; height: 20px; border-radius: 50%; background: white; top: 3px; left: 3px; transition: transform .2s; }
 .escala-toggle.on::after { transform: translateX(18px); }
 
 /* ── Modal ── */
-.modal-overlay {
-  display: none; position: fixed; inset: 0; z-index: 200;
-  background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
-  align-items: flex-end; justify-content: center;
-}
+.modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); align-items: flex-end; justify-content: center; }
 .modal-overlay.open { display: flex; }
-.modal {
-  background: var(--bg2); border-radius: 24px 24px 0 0;
-  padding: 20px 20px calc(20px + var(--safe-bot));
-  width: 100%; max-width: 480px;
-  animation: slideUp .3s cubic-bezier(.4,0,.2,1);
-}
+.modal { background: var(--bg2); border-radius: 24px 24px 0 0; padding: 20px 20px calc(20px + var(--safe-bot)); width: 100%; max-width: 480px; animation: slideUp .3s cubic-bezier(.4,0,.2,1); }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .modal-handle { width: 36px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.15); margin: 0 auto 18px; }
 .modal-title  { font-size: 17px; font-weight: 700; margin-bottom: 14px; }
 
 /* ── Toast ── */
-.toast {
-  position: fixed; bottom: calc(88px + var(--safe-bot)); left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--bg3); border: 1px solid var(--border);
-  border-radius: 99px; padding: 10px 20px;
-  font-size: 13px; font-weight: 500;
-  white-space: nowrap; opacity: 0;
-  transition: all .3s; z-index: 300; pointer-events: none;
-}
+.toast { position: fixed; bottom: calc(88px + var(--safe-bot)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--bg3); border: 1px solid var(--border); border-radius: 99px; padding: 10px 20px; font-size: 13px; font-weight: 500; white-space: nowrap; opacity: 0; transition: all .3s; z-index: 300; pointer-events: none; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 .loading { display: flex; align-items: center; justify-content: center; padding: 36px; color: var(--text2); gap: 10px; font-size: 14px; }
@@ -300,7 +207,7 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
 .row { display: flex; gap: 10px; }
 .row > * { flex: 1; min-width: 0; }
 
-.setup-wrap { display: flex; flex-direction: column; align-items: center; padding: 50px 20px 40px; text-align: center; }
+.setup-wrap  { display: flex; flex-direction: column; align-items: center; padding: 50px 20px 40px; text-align: center; }
 .setup-icon  { font-size: 60px; margin-bottom: 20px; }
 .setup-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
 .setup-sub   { color: var(--text2); font-size: 14px; line-height: 1.6; margin-bottom: 28px; }
@@ -366,14 +273,8 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
         </button>
       </div>
     </div>
-    <div class="card">
-      <div class="card-label">Atividades de hoje</div>
-      <textarea id="atividades-txt" rows="3" placeholder="O que você fez hoje no estágio?"></textarea>
-      <button class="btn btn-ghost" style="margin-top:10px" onclick="salvarAtividades()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        Salvar atividades
-      </button>
-    </div>
+
+    <!-- Progresso -->
     <div class="card">
       <div class="card-label">Progresso do estágio</div>
       <div class="progress-pct" id="prog-pct">0%</div>
@@ -394,12 +295,23 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
   <!-- RELATÓRIOS -->
   <div id="screen-relatorios" class="screen">
     <div class="section-title">Relatórios</div>
-    <div class="card" style="padding:14px">
+
+    <!-- Filtro por período personalizado -->
+    <div class="card">
       <div class="row">
-        <div><label>Período</label><select id="rel-tipo" onchange="carregarRelatorio()"><option value="semana">Semanal</option><option value="mes" selected>Mensal</option></select></div>
-        <div><label>Mês/Ano</label><input type="month" id="rel-mes" onchange="carregarRelatorio()"></div>
+        <div>
+          <label>Data inicial</label>
+          <input type="date" id="rel-ini" onchange="carregarRelatorio()">
+          <div class="hint" id="hint-ini"></div>
+        </div>
+        <div>
+          <label>Data final</label>
+          <input type="date" id="rel-fim" onchange="carregarRelatorio()">
+          <div class="hint" id="hint-fim"></div>
+        </div>
       </div>
     </div>
+
     <div class="stat-grid" style="margin-bottom:14px">
       <div class="stat-card"><div class="stat-val" id="rel-total">0h</div><div class="stat-lbl">Total período</div></div>
       <div class="stat-card"><div class="stat-val" id="rel-dias">0</div><div class="stat-lbl">Dias trabalhados</div></div>
@@ -424,10 +336,8 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
       <label>URL do Apps Script</label><input type="text" id="cfg-url" style="margin-bottom:16px">
       <button class="btn btn-primary" onclick="salvarConfigApp()">Salvar configurações</button>
     </div>
-
     <div class="card">
       <div class="card-label">Minha escala de trabalho</div>
-      <!-- grid responsivo: dia | entrada | saída | toggle -->
       <div class="escala-grid" id="escala-wrap">
         <div class="escala-header-cell">Dia</div>
         <div class="escala-header-cell" style="text-align:center">Entrada</div>
@@ -436,7 +346,6 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
       </div>
       <button class="btn btn-primary" style="margin-top:14px" onclick="salvarEscala()">Salvar escala</button>
     </div>
-
     <div class="card" style="margin-bottom:40px">
       <div class="card-label">Notificações</div>
       <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Receba alertas quando esquecer de registrar o ponto.</p>
@@ -464,20 +373,44 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
   </nav>
 </div>
 
-<!-- Modal atividades (obrigatório na saída) -->
+<!-- Modal saída — atividades obrigatórias, hora capturada no clique -->
 <div class="modal-overlay" id="modal-saida">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">🏁 Registrar saída</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:14px">
-      Antes de registrar a saída, descreva as atividades que você realizou hoje.
-    </p>
-    <label>O que você fez hoje? <span style="color:var(--red)">*</span></label>
-    <textarea id="modal-ativ-saida" rows="3" placeholder="Ex: Atendimento ao público, organização de arquivos..." style="margin-bottom:6px"></textarea>
-    <p id="modal-ativ-erro" style="font-size:12px;color:var(--red);margin-bottom:12px;display:none">Por favor, descreva as atividades antes de registrar a saída.</p>
-    <div style="display:flex;gap:10px">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:4px">Saída registrada às <strong id="modal-hora-saida" style="color:var(--accent2)">--:--</strong></p>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Descreva o que você fez hoje antes de confirmar.</p>
+    <label>Atividades realizadas <span style="color:var(--red)">*</span></label>
+    <textarea id="modal-ativ-saida" rows="4" placeholder="Ex: Atendimento ao público, organização de arquivos..." style="margin-bottom:6px"></textarea>
+    <p id="modal-ativ-erro" style="font-size:12px;color:var(--red);margin-bottom:12px;display:none">Descreva as atividades para confirmar a saída.</p>
+    <div style="display:flex;gap:10px;margin-top:4px">
       <button class="btn btn-ghost" onclick="fecharModalSaida()">Cancelar</button>
-      <button class="btn btn-primary" onclick="confirmarSaida()">Registrar saída</button>
+      <button class="btn btn-primary" onclick="confirmarSaida()">Confirmar saída</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal edição de registro -->
+<div class="modal-overlay" id="modal-edicao">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ Editar registro</div>
+    <p id="modal-edit-data-txt" style="font-size:12px;color:var(--text2);margin-bottom:14px"></p>
+    <div class="row" style="margin-bottom:12px">
+      <div>
+        <label>Entrada</label>
+        <input type="text" id="edit-entrada" placeholder="HH:MM" maxlength="5">
+      </div>
+      <div>
+        <label>Saída</label>
+        <input type="text" id="edit-saida" placeholder="HH:MM" maxlength="5">
+      </div>
+    </div>
+    <label>Atividades</label>
+    <textarea id="edit-atividades" rows="3" style="margin-bottom:14px" placeholder="O que foi feito neste dia?"></textarea>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" onclick="fecharModalEdicao()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarEdicao()">Salvar edição</button>
     </div>
   </div>
 </div>
@@ -487,9 +420,7 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">📋 Justificativa de ausência</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:14px">
-      Sem registro em <strong id="modal-data-txt"></strong>. O que aconteceu?
-    </p>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Sem registro em <strong id="modal-data-txt"></strong>. O que aconteceu?</p>
     <label>Motivo</label>
     <select id="modal-motivo" style="margin-bottom:12px">
       <option value="aula">Aula / compromisso da faculdade</option>
@@ -511,7 +442,7 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
 
 <script>
 // ══════════════════════════════════════════════════
-// CONFIG & STATE
+// STATE
 // ══════════════════════════════════════════════════
 const ESCALA_KEY = 'ponto_escala';
 let cfg = {
@@ -527,24 +458,24 @@ let escala = JSON.parse(localStorage.getItem(ESCALA_KEY) || 'null') || [
   { dia:'Sexta',   entrada:'08:00', saida:'12:00', ativo:true  },
   { dia:'Sábado',  entrada:'08:00', saida:'12:00', ativo:false },
 ];
-let registrosHoje = null;
+let registrosHoje    = null;
 let modalDataPendente = null;
-let registrosTodos = [];
+let modalEditData     = null;   // data do registro sendo editado
+let horaSaidaCapturada = null;  // ⏱ hora capturada no clique do botão saída
+let registrosTodos   = [];
 
 // ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-  if (!cfg.url) { document.getElementById('setup-screen').style.display = 'block'; }
-  else           { iniciarApp(); }
+  if (!cfg.url) document.getElementById('setup-screen').style.display = 'block';
+  else           iniciarApp();
 });
 
 function iniciarApp() {
   document.getElementById('app').style.display = 'block';
   document.getElementById('setup-screen').style.display = 'none';
   atualizarHeader(); startClock(); carregarHome(); registrarSW();
-  const h = new Date();
-  document.getElementById('rel-mes').value = h.getFullYear() + '-' + String(h.getMonth()+1).padStart(2,'0');
 }
 
 function salvarSetup() {
@@ -560,7 +491,7 @@ function salvarSetup() {
 }
 
 // ══════════════════════════════════════════════════
-// CLOCK
+// CLOCK & HEADER
 // ══════════════════════════════════════════════════
 function startClock() {
   const t = () => document.getElementById('header-clock').textContent =
@@ -576,14 +507,13 @@ function atualizarHeader() {
 }
 
 // ══════════════════════════════════════════════════
-// API — 100% GET para evitar CORS
+// API — GET only
 // ══════════════════════════════════════════════════
 async function api(params) {
   if (!cfg.url) return { error: 'URL não configurada' };
   const norm = {};
-  for (const [k, v] of Object.entries(params)) {
+  for (const [k, v] of Object.entries(params))
     norm[k] = (typeof v === 'object') ? JSON.stringify(v) : v;
-  }
   try {
     const r = await fetch(cfg.url + '?' + new URLSearchParams(norm).toString(), { redirect:'follow' });
     return await r.json();
@@ -603,13 +533,14 @@ async function carregarHome() {
 }
 
 function atualizarStatusHoje() {
-  const r = registrosHoje;
+  const r    = registrosHoje;
   const chip = document.getElementById('status-chip');
   const hEl  = document.getElementById('horas-hoje');
   const btnE = document.getElementById('btn-entrada');
   const btnS = document.getElementById('btn-saida');
   const tE   = document.getElementById('time-entrada');
   const tS   = document.getElementById('time-saida');
+
   if (!r || (!r.entrada && !r.justificativa)) {
     chip.className='chip idle'; chip.innerHTML='<span class="chip-dot"></span> Sem registro';
     hEl.textContent='0h00'; btnE.disabled=false; btnS.disabled=true;
@@ -626,17 +557,16 @@ function atualizarStatusHoje() {
     chip.className='chip idle'; chip.innerHTML='<span class="chip-dot"></span> Justificado';
     hEl.textContent='0h00'; btnE.disabled=false; btnS.disabled=true;
   }
-  if (r && r.atividades) document.getElementById('atividades-txt').value = r.atividades;
 }
 
 function atualizarProgress() {
   const meta  = cfg.meta || 0;
   const total = registrosTodos.reduce((s,r) => s+(r.horas||0), 0);
   const pct   = meta > 0 ? Math.min(100, Math.round(total/meta*100)) : 0;
-  document.getElementById('prog-pct').textContent   = pct + '%';
-  document.getElementById('prog-bar').style.width   = pct + '%';
-  document.getElementById('prog-cur').textContent   = formatHoras(total);
-  document.getElementById('prog-meta').textContent  = 'Meta: ' + meta + 'h';
+  document.getElementById('prog-pct').textContent    = pct + '%';
+  document.getElementById('prog-bar').style.width    = pct + '%';
+  document.getElementById('prog-cur').textContent    = formatHoras(total);
+  document.getElementById('prog-meta').textContent   = 'Meta: ' + meta + 'h';
   document.getElementById('stat-semana').textContent = formatHoras(somarHorasSemana(registrosTodos));
   document.getElementById('stat-mes').textContent    = formatHoras(somarHorasMes(registrosTodos));
 }
@@ -647,7 +577,7 @@ async function verificarPendentes() {
   const mapa = { 'Segunda':1,'Terça':2,'Quarta':3,'Quinta':4,'Sexta':5,'Sábado':6,'Domingo':0 };
   const hoje = new Date();
   for (let i = 1; i <= 7; i++) {
-    const d = new Date(hoje); d.setDate(hoje.getDate() - i);
+    const d    = new Date(hoje); d.setDate(hoje.getDate() - i);
     const dStr = formatDateStr(d);
     const diaE = escala.find(e => e.ativo && mapa[e.dia] === d.getDay());
     if (!diaE) continue;
@@ -673,55 +603,15 @@ async function verificarPendentes() {
 // ══════════════════════════════════════════════════
 async function registrarPonto(tipo) {
   if (tipo === 'saida') {
-    // Abre modal obrigatório de atividades antes de registrar saída
-    const ativAtual = document.getElementById('atividades-txt').value.trim();
+    // ⏱ Captura a hora AGORA, antes de abrir o modal
+    horaSaidaCapturada = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+    document.getElementById('modal-hora-saida').textContent = horaSaidaCapturada;
     document.getElementById('modal-ativ-saida').value = '';
-    if (ativAtual) document.getElementById('modal-ativ-saida').value = ativAtual;
     document.getElementById('modal-ativ-erro').style.display = 'none';
     document.getElementById('modal-saida').classList.add('open');
     return;
   }
-  await _registrarEntrada();
-}
-
-function fecharModalSaida() {
-  document.getElementById('modal-saida').classList.remove('open');
-}
-
-async function confirmarSaida() {
-  const ativ = document.getElementById('modal-ativ-saida').value.trim();
-  if (!ativ) {
-    document.getElementById('modal-ativ-erro').style.display = 'block';
-    return;
-  }
-  document.getElementById('modal-ativ-erro').style.display = 'none';
-  fecharModalSaida();
-
-  const hora = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
-  const data = dataHoje();
-  toast('Registrando saída...');
-
-  // Salva atividades primeiro
-  await api({ action:'salvarAtividades', data, atividades: ativ });
-  // Depois registra saída
-  const res = await api({ action:'salvarSaida', data, hora });
-  if (res.error) { toast('❌ Erro: ' + res.error); return; }
-
-  toast(`✅ Saída registrada às ${hora}`);
-  // Atualiza campo de atividades e limpa
-  document.getElementById('atividades-txt').value = '';
-
-  if (!registrosHoje) registrosHoje = { data, entrada:'', saida:'', horas:0, atividades:'', justificativa:'', status:'' };
-  registrosHoje.saida = hora; registrosHoje.horas = res.horas||0;
-  registrosHoje.status = 'completo'; registrosHoje.atividades = ativ;
-  const idx = registrosTodos.findIndex(r => r.data === data);
-  if (idx >= 0) registrosTodos[idx] = { ...registrosTodos[idx], ...registrosHoje };
-  else registrosTodos.push(registrosHoje);
-  atualizarProgress();
-  atualizarStatusHoje();
-}
-
-async function _registrarEntrada() {
+  // Entrada
   const hora = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
   const data = dataHoje();
   toast('Registrando entrada...');
@@ -733,50 +623,106 @@ async function _registrarEntrada() {
   atualizarStatusHoje();
 }
 
-async function salvarAtividades() {
-  const ativ = document.getElementById('atividades-txt').value.trim();
-  if (!ativ) { toast('Escreva as atividades primeiro'); return; }
-  const res = await api({ action:'salvarAtividades', data:dataHoje(), atividades:ativ });
-  if (res.error) { toast('❌ Erro: '+res.error); }
-  else {
-    toast('✅ Atividades salvas!');
-    document.getElementById('atividades-txt').value = '';
+function fecharModalSaida() {
+  document.getElementById('modal-saida').classList.remove('open');
+  horaSaidaCapturada = null;
+}
+
+async function confirmarSaida() {
+  const ativ = document.getElementById('modal-ativ-saida').value.trim();
+  if (!ativ) { document.getElementById('modal-ativ-erro').style.display = 'block'; return; }
+  document.getElementById('modal-ativ-erro').style.display = 'none';
+
+  // Usa a hora capturada no clique do botão, não a hora atual
+  const hora = horaSaidaCapturada;
+  const data = dataHoje();
+  fecharModalSaida();
+  toast('Registrando saída...');
+
+  await api({ action:'salvarAtividades', data, atividades: ativ });
+  const res = await api({ action:'salvarSaida', data, hora });
+  if (res.error) { toast('❌ Erro: ' + res.error); return; }
+
+  toast(`✅ Saída registrada às ${hora}`);
+  if (!registrosHoje) registrosHoje = { data, entrada:'', saida:'', horas:0, atividades:'', justificativa:'', status:'' };
+  registrosHoje.saida = hora; registrosHoje.horas = res.horas||0;
+  registrosHoje.status = 'completo'; registrosHoje.atividades = ativ;
+  const idx = registrosTodos.findIndex(r => r.data === data);
+  if (idx >= 0) registrosTodos[idx] = { ...registrosTodos[idx], ...registrosHoje };
+  else registrosTodos.push(registrosHoje);
+  atualizarProgress();
+  atualizarStatusHoje();
+}
+
+// ══════════════════════════════════════════════════
+// EDIÇÃO DE REGISTRO
+// ══════════════════════════════════════════════════
+function abrirEdicao(dataStr, entrada, saida, atividades) {
+  modalEditData = dataStr;
+  const [a,m,d] = dataStr.split('-');
+  document.getElementById('modal-edit-data-txt').textContent = `Editando registro de ${d}/${m}/${a}`;
+  document.getElementById('edit-entrada').value   = entrada   || '';
+  document.getElementById('edit-saida').value     = saida     || '';
+  document.getElementById('edit-atividades').value = atividades || '';
+  document.getElementById('modal-edicao').classList.add('open');
+}
+
+function fecharModalEdicao() {
+  document.getElementById('modal-edicao').classList.remove('open');
+  modalEditData = null;
+}
+
+async function confirmarEdicao() {
+  const entrada    = document.getElementById('edit-entrada').value.trim();
+  const saida      = document.getElementById('edit-saida').value.trim();
+  const atividades = document.getElementById('edit-atividades').value.trim();
+
+  if (!entrada && !saida && !atividades) { toast('Preencha ao menos um campo'); return; }
+
+  toast('Salvando edição...');
+  fecharModalEdicao();
+
+  // Salva cada campo que foi preenchido
+  if (atividades) await api({ action:'salvarAtividades', data: modalEditData, atividades });
+  if (entrada || saida) {
+    if (entrada) await api({ action:'salvarEntrada', data: modalEditData, hora: entrada });
+    if (saida)   await api({ action:'salvarSaida',   data: modalEditData, hora: saida });
   }
+
+  toast('✅ Registro atualizado!');
+  // Recarrega listas
+  await carregarHistorico();
+  const ini = document.getElementById('rel-ini').value;
+  const fim = document.getElementById('rel-fim').value;
+  if (ini && fim) carregarRelatorio();
 }
 
 // ══════════════════════════════════════════════════
-// JUSTIFICATIVA
-// ══════════════════════════════════════════════════
-function abrirJustificativa(data) {
-  modalDataPendente = data;
-  const [a,m,d] = data.split('-');
-  document.getElementById('modal-data-txt').textContent = `${d}/${m}/${a}`;
-  document.getElementById('modal-obs').value = '';
-  document.getElementById('modal-justificativa').classList.add('open');
-}
-function fecharModal() { document.getElementById('modal-justificativa').classList.remove('open'); }
-async function confirmarJustificativa() {
-  const motivo = document.getElementById('modal-motivo').value;
-  const obs    = document.getElementById('modal-obs').value;
-  const res = await api({ action:'salvarJustificativa', data:modalDataPendente, justificativa: obs?`${motivo}: ${obs}`:motivo, status:motivo });
-  fecharModal();
-  toast(res.error ? '❌ Erro: '+res.error : '✅ Justificativa salva!');
-  if (!res.error) carregarHome();
-}
-
-// ══════════════════════════════════════════════════
-// RELATÓRIOS
+// RELATÓRIOS — período personalizado
 // ══════════════════════════════════════════════════
 async function carregarRelatorio() {
+  const ini = document.getElementById('rel-ini').value;
+  const fim = document.getElementById('rel-fim').value;
+  if (!ini || !fim) return;
+
   document.getElementById('rel-lista').innerHTML = '<div class="loading"><div class="spinner"></div> Carregando...</div>';
-  const mes = document.getElementById('rel-mes').value;
-  const res = await api({ action:'getRegistros', mes });
-  const regs = (res.registros||[]).filter(r => r.horas > 0);
+
+  const res  = await api({ action:'getRegistros' });
+  const todos = res.registros || [];
+
+  // Filtra pelo período
+  const regs = todos.filter(r => r.horas > 0 && r.data >= ini && r.data <= fim);
+
   document.getElementById('rel-total').textContent = formatHoras(regs.reduce((s,r)=>s+r.horas,0));
   document.getElementById('rel-dias').textContent  = regs.length;
   renderGrafico(regs);
+
   const lista = document.getElementById('rel-lista');
-  if (!regs.length) { lista.innerHTML='<div class="loading" style="color:var(--text2)">Nenhum registro neste período</div>'; return; }
+  if (!regs.length) {
+    lista.innerHTML = '<div class="loading" style="color:var(--text2)">Nenhum registro neste período</div>';
+    return;
+  }
+
   lista.innerHTML = regs.slice().reverse().map(r => {
     const [a,m,d] = r.data.split('-');
     return `<div class="hist-item">
@@ -785,16 +731,29 @@ async function carregarRelatorio() {
         <div style="font-size:12px"><span style="color:var(--green)">${r.entrada}</span> → <span style="color:var(--red)">${r.saida}</span></div>
         <div class="hist-ativ">${r.atividades||'—'}</div>
       </div>
-      <div class="hist-horas" style="color:var(--accent2)">${formatHoras(r.horas)}</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <div class="hist-horas" style="color:var(--accent2)">${formatHoras(r.horas)}</div>
+        <button class="edit-btn" onclick="abrirEdicao('${r.data}','${r.entrada}','${r.saida}',\`${(r.atividades||'').replace(/`/g,"'")}\`)">✏️</button>
+      </div>
     </div>`;
   }).join('');
 }
 
 function renderGrafico(regs) {
-  const s = [{lbl:'S1',h:0},{lbl:'S2',h:0},{lbl:'S3',h:0},{lbl:'S4',h:0},{lbl:'S5',h:0}];
-  regs.forEach(r => { const d=parseInt(r.data.split('-')[2]); s[Math.min(4,Math.floor((d-1)/7))].h+=r.horas; });
-  const max = Math.max(...s.map(x=>x.h), 1);
-  document.getElementById('chart-semanas').innerHTML = s.map(x=>`
+  // Agrupa por semana relativa ao período
+  const semanas = [{lbl:'S1',h:0},{lbl:'S2',h:0},{lbl:'S3',h:0},{lbl:'S4',h:0},{lbl:'S5',h:0}];
+  const ini = document.getElementById('rel-ini').value;
+  if (ini) {
+    const iniDate = new Date(ini + 'T00:00:00');
+    regs.forEach(r => {
+      const d    = new Date(r.data + 'T00:00:00');
+      const diff = Math.floor((d - iniDate) / (7 * 24 * 3600 * 1000));
+      const idx  = Math.min(4, Math.max(0, diff));
+      semanas[idx].h += r.horas;
+    });
+  }
+  const max = Math.max(...semanas.map(x=>x.h), 1);
+  document.getElementById('chart-semanas').innerHTML = semanas.map(x=>`
     <div class="chart-bar-wrap">
       <div class="chart-val">${x.h>0?formatHoras(x.h):''}</div>
       <div class="chart-bar" style="height:${Math.round(x.h/max*70)+10}px"><div class="chart-bar-fill"></div></div>
@@ -802,14 +761,33 @@ function renderGrafico(regs) {
     </div>`).join('');
 }
 
+// Preenche hints com primeiro e último registro
+function atualizarHintsRelatorio() {
+  const comHoras = registrosTodos.filter(r => r.horas > 0).map(r => r.data).sort();
+  if (!comHoras.length) return;
+
+  const primeiro = comHoras[0];
+  const ultimo   = comHoras[comHoras.length - 1];
+
+  const fmt = str => { const [a,m,d] = str.split('-'); return `${d}/${m}/${a}`; };
+  document.getElementById('hint-ini').textContent = `Primeiro registro: ${fmt(primeiro)}`;
+  document.getElementById('hint-fim').textContent = `Último registro: ${fmt(ultimo)}`;
+}
+
 // ══════════════════════════════════════════════════
 // HISTÓRICO
 // ══════════════════════════════════════════════════
 async function carregarHistorico() {
   const res  = await api({ action:'getRegistros' });
-  const regs = (res.registros||[]).slice().reverse();
+  registrosTodos = res.registros || [];
+  const regs = registrosTodos.slice().reverse();
   const lista = document.getElementById('hist-lista');
-  if (!regs.length) { lista.innerHTML='<div class="loading" style="color:var(--text2)">Nenhum registro ainda</div>'; return; }
+
+  if (!regs.length) {
+    lista.innerHTML = '<div class="loading" style="color:var(--text2)">Nenhum registro ainda</div>';
+    return;
+  }
+
   lista.innerHTML = regs.map(r => {
     const [a,m,d] = r.data.split('-');
     const cls   = r.status==='completo'?'ok':r.status==='em_andamento'?'warn':'idle';
@@ -822,7 +800,10 @@ async function carregarHistorico() {
         ${r.atividades?`<div class="hist-ativ">${r.atividades}</div>`:''}
         ${r.justificativa?`<div class="hist-ativ" style="color:var(--yellow)">${r.justificativa}</div>`:''}
       </div>
-      <div class="hist-horas">${r.horas>0?formatHoras(r.horas):'-'}</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <div class="hist-horas">${r.horas>0?formatHoras(r.horas):'-'}</div>
+        <button class="edit-btn" onclick="abrirEdicao('${r.data}','${r.entrada}','${r.saida}',\`${(r.atividades||'').replace(/`/g,"'")}\`)">✏️</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -846,48 +827,21 @@ function renderEscala() {
     <div class="escala-header-cell"></div>`;
 
   escala.forEach((e, i) => {
-    // separador horizontal
-    const sep = document.createElement('div');
-    sep.className = 'escala-sep';
-    wrap.appendChild(sep);
-
-    // nome do dia
-    const dia = document.createElement('div');
-    dia.className = 'escala-dia'; dia.textContent = e.dia;
-    wrap.appendChild(dia);
-
-    // input entrada
-    const inE = document.createElement('input');
-    inE.type = 'text'; inE.id = `esc-e-${i}`; inE.value = e.entrada; inE.placeholder='HH:MM'; inE.maxLength=5; inE.className='hora-input';
-    wrap.appendChild(inE);
-
-    // input saída
-    const inS = document.createElement('input');
-    inS.type = 'text'; inS.id = `esc-s-${i}`; inS.value = e.saida; inS.placeholder='HH:MM'; inS.maxLength=5; inS.className='hora-input';
-    wrap.appendChild(inS);
-
-    // toggle
-    const tog = document.createElement('button');
-    tog.className = 'escala-toggle' + (e.ativo?' on':'');
-    tog.id = `esc-t-${i}`;
-    tog.setAttribute('aria-label', e.ativo?'Ativo':'Inativo');
-    tog.onclick = () => toggleEscala(i);
-    wrap.appendChild(tog);
+    const sep = document.createElement('div'); sep.className='escala-sep'; wrap.appendChild(sep);
+    const dia = document.createElement('div'); dia.className='escala-dia'; dia.textContent=e.dia; wrap.appendChild(dia);
+    const inE = document.createElement('input'); inE.type='text'; inE.id=`esc-e-${i}`; inE.value=e.entrada; inE.placeholder='HH:MM'; inE.maxLength=5; wrap.appendChild(inE);
+    const inS = document.createElement('input'); inS.type='text'; inS.id=`esc-s-${i}`; inS.value=e.saida;   inS.placeholder='HH:MM'; inS.maxLength=5; wrap.appendChild(inS);
+    const tog = document.createElement('button'); tog.className='escala-toggle'+(e.ativo?' on':''); tog.id=`esc-t-${i}`; tog.onclick=()=>toggleEscala(i); wrap.appendChild(tog);
   });
 }
 
 function toggleEscala(i) {
   escala[i].ativo = !escala[i].ativo;
-  const t = document.getElementById(`esc-t-${i}`);
-  t.className = 'escala-toggle' + (escala[i].ativo?' on':'');
+  document.getElementById(`esc-t-${i}`).className = 'escala-toggle'+(escala[i].ativo?' on':'');
 }
 
 async function salvarEscala() {
-  escala = escala.map((e,i) => ({
-    ...e,
-    entrada: document.getElementById(`esc-e-${i}`).value || e.entrada,
-    saida:   document.getElementById(`esc-s-${i}`).value || e.saida,
-  }));
+  escala = escala.map((e,i) => ({ ...e, entrada: document.getElementById(`esc-e-${i}`).value||e.entrada, saida: document.getElementById(`esc-s-${i}`).value||e.saida }));
   localStorage.setItem(ESCALA_KEY, JSON.stringify(escala));
   const res = await api({ action:'salvarEscala', escala });
   toast(res.error ? '❌ Erro: '+res.error : '✅ Escala salva!');
@@ -897,10 +851,8 @@ async function salvarConfigApp() {
   const nome = document.getElementById('cfg-nome').value.trim();
   const meta = parseFloat(document.getElementById('cfg-meta').value) || 0;
   const url  = document.getElementById('cfg-url').value.trim();
-  cfg.nome = nome; cfg.meta = meta; cfg.url = url;
-  localStorage.setItem('ponto_url', url);
-  localStorage.setItem('ponto_nome', nome);
-  localStorage.setItem('ponto_meta', meta);
+  cfg.nome=nome; cfg.meta=meta; cfg.url=url;
+  localStorage.setItem('ponto_url',url); localStorage.setItem('ponto_nome',nome); localStorage.setItem('ponto_meta',meta);
   await api({ action:'salvarConfig', chave:'nome',       valor:nome });
   await api({ action:'salvarConfig', chave:'meta_horas', valor:meta });
   atualizarHeader();
@@ -908,12 +860,31 @@ async function salvarConfigApp() {
 }
 
 // ══════════════════════════════════════════════════
+// JUSTIFICATIVA
+// ══════════════════════════════════════════════════
+function abrirJustificativa(data) {
+  modalDataPendente = data;
+  const [a,m,d] = data.split('-');
+  document.getElementById('modal-data-txt').textContent = `${d}/${m}/${a}`;
+  document.getElementById('modal-obs').value = '';
+  document.getElementById('modal-justificativa').classList.add('open');
+}
+function fecharModal() { document.getElementById('modal-justificativa').classList.remove('open'); }
+async function confirmarJustificativa() {
+  const motivo = document.getElementById('modal-motivo').value;
+  const obs    = document.getElementById('modal-obs').value;
+  const res = await api({ action:'salvarJustificativa', data:modalDataPendente, justificativa:obs?`${motivo}: ${obs}`:motivo, status:motivo });
+  fecharModal();
+  toast(res.error ? '❌ Erro: '+res.error : '✅ Justificativa salva!');
+  if (!res.error) carregarHome();
+}
+
+// ══════════════════════════════════════════════════
 // SW & NOTIFICAÇÕES
 // ══════════════════════════════════════════════════
 async function registrarSW() {
   if (!('serviceWorker' in navigator)) return;
-  try { await navigator.serviceWorker.register('./sw.js'); agendarLembretes(); }
-  catch(e) { console.warn('SW:', e); }
+  try { await navigator.serviceWorker.register('./sw.js'); agendarLembretes(); } catch(e) {}
 }
 async function pedirPermissaoNotificacao() {
   if (!('Notification' in window)) { toast('Notificações não suportadas'); return; }
@@ -928,9 +899,9 @@ function agendarLembretes() {
   const hoje = new Date();
   escala.forEach(e => {
     if (!e.ativo || mapa[e.dia] !== hoje.getDay()) return;
-    const mkTime = (str, extra=10) => { const [h,m]=str.split(':').map(Number); const t=new Date(hoje); t.setHours(h,m+extra,0); return t; };
-    const et = mkTime(e.entrada); if (et>hoje) sw.postMessage({ type:'SCHEDULE_NOTIFICATION', title:'⏱ Ponto de entrada!', body:`Registre sua entrada (${e.entrada})`, delay:et-hoje });
-    const st = mkTime(e.saida);   if (st>hoje) sw.postMessage({ type:'SCHEDULE_NOTIFICATION', title:'🏁 Ponto de saída!',   body:`Registre sua saída (${e.saida})`,   delay:st-hoje });
+    const mk = (str) => { const [h,m]=str.split(':').map(Number); const t=new Date(hoje); t.setHours(h,m+10,0); return t; };
+    const et=mk(e.entrada); if(et>hoje) sw.postMessage({type:'SCHEDULE_NOTIFICATION',title:'⏱ Ponto de entrada!',body:`Registre sua entrada (${e.entrada})`,delay:et-hoje});
+    const st=mk(e.saida);   if(st>hoje) sw.postMessage({type:'SCHEDULE_NOTIFICATION',title:'🏁 Ponto de saída!',  body:`Registre sua saída (${e.saida})`,  delay:st-hoje});
   });
 }
 
@@ -942,9 +913,20 @@ function irPara(s) {
   document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
   document.getElementById('screen-'+s).classList.add('active');
   document.getElementById('nav-'+s).classList.add('active');
-  if (s==='relatorios') carregarRelatorio();
-  if (s==='historico')  carregarHistorico();
-  if (s==='config')     carregarConfigScreen();
+  if (s==='relatorios') {
+    // Define período padrão: mês atual
+    if (!document.getElementById('rel-ini').value) {
+      const hoje = new Date();
+      const ini  = hoje.getFullYear()+'-'+String(hoje.getMonth()+1).padStart(2,'0')+'-01';
+      const fim  = formatDateStr(hoje);
+      document.getElementById('rel-ini').value = ini;
+      document.getElementById('rel-fim').value = fim;
+    }
+    atualizarHintsRelatorio();
+    carregarRelatorio();
+  }
+  if (s==='historico') carregarHistorico();
+  if (s==='config')    carregarConfigScreen();
 }
 
 // ══════════════════════════════════════════════════
@@ -955,7 +937,7 @@ function formatDateStr(d) {
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 function formatHoras(h) {
-  const hh = Math.floor(h), mm = Math.round((h-hh)*60);
+  const hh=Math.floor(h), mm=Math.round((h-hh)*60);
   return `${hh}h${String(mm).padStart(2,'0')}`;
 }
 function somarHorasSemana(regs) {
