@@ -474,29 +474,50 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
   </nav>
 </div>
 
-<!-- Modal saída — atividades obrigatórias, hora capturada no clique -->
+<!-- Modal saída — 7 perguntas, todas opcionais -->
 <div class="modal-overlay" id="modal-saida">
-  <div class="modal">
+  <div class="modal" style="max-height:90vh;overflow-y:auto">
     <div class="modal-handle"></div>
     <div class="modal-title">🏁 Registrar saída</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:4px">Saída registrada às <strong id="modal-hora-saida" style="color:var(--accent2)">--:--</strong></p>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Descreva o que você fez hoje antes de confirmar.</p>
-    <label>Atividades realizadas <span style="color:var(--red)">*</span></label>
-    <textarea id="modal-ativ-saida" rows="4" placeholder="Ex: Atendimento ao público, organização de arquivos..." style="margin-bottom:6px"></textarea>
-    <p id="modal-ativ-erro" style="font-size:12px;color:var(--red);margin-bottom:12px;display:none">Descreva as atividades para confirmar a saída.</p>
-    <div style="display:flex;gap:10px;margin-top:4px">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px">
+      Saída registrada às <strong id="modal-hora-saida" style="color:var(--accent2)">--:--</strong> — todos os campos são opcionais.
+    </p>
+
+    <label>1. Atividades realizadas</label>
+    <textarea id="modal-ativ-saida" rows="2" placeholder="O que você fez hoje?" style="margin-bottom:12px"></textarea>
+
+    <label>2. Temas e legislações estudadas</label>
+    <textarea id="modal-temas" rows="2" placeholder="Quais temas ou legislações foram estudados?" style="margin-bottom:12px"></textarea>
+
+    <label>3. Pontos fortes</label>
+    <textarea id="modal-pontos-fortes" rows="2" placeholder="O que foi bem? Quais aprendizados foram mais significativos?" style="margin-bottom:12px"></textarea>
+
+    <label>4. Pontos fracos e desafios</label>
+    <textarea id="modal-pontos-fracos" rows="2" placeholder="Quais dificuldades? O que poderia ter sido melhor?" style="margin-bottom:12px"></textarea>
+
+    <label>5. O que preciso aprender</label>
+    <textarea id="modal-aprender" rows="2" placeholder="Quais conhecimentos ou habilidades preciso desenvolver?" style="margin-bottom:12px"></textarea>
+
+    <label>6. Situação ou caso para relatar</label>
+    <textarea id="modal-caso" rows="2" placeholder="Situação de aprendizado, algum caso ou atendimento..." style="margin-bottom:12px"></textarea>
+
+    <label>7. Intercorrências</label>
+    <textarea id="modal-intercorrencias" rows="2" placeholder="Situações não previstas que ocorreram..." style="margin-bottom:14px"></textarea>
+
+    <div style="display:flex;gap:10px">
       <button class="btn btn-ghost" onclick="fecharModalSaida()">Cancelar</button>
       <button class="btn btn-primary" onclick="confirmarSaida()">Confirmar saída</button>
     </div>
   </div>
 </div>
 
-<!-- Modal edição de registro -->
+<!-- Modal edição — horários + 7 perguntas -->
 <div class="modal-overlay" id="modal-edicao">
-  <div class="modal">
+  <div class="modal" style="max-height:90vh;overflow-y:auto">
     <div class="modal-handle"></div>
     <div class="modal-title">✏️ Editar registro</div>
     <p id="modal-edit-data-txt" style="font-size:12px;color:var(--text2);margin-bottom:14px"></p>
+
     <div class="row" style="margin-bottom:12px">
       <div>
         <label>Entrada</label>
@@ -507,8 +528,28 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
         <input type="text" id="edit-saida" placeholder="HH:MM" maxlength="5">
       </div>
     </div>
-    <label>Atividades</label>
-    <textarea id="edit-atividades" rows="3" style="margin-bottom:14px" placeholder="O que foi feito neste dia?"></textarea>
+
+    <label>1. Atividades realizadas</label>
+    <textarea id="edit-atividades" rows="2" placeholder="O que foi feito neste dia?" style="margin-bottom:12px"></textarea>
+
+    <label>2. Temas e legislações estudadas</label>
+    <textarea id="edit-temas" rows="2" placeholder="Quais temas ou legislações foram estudados?" style="margin-bottom:12px"></textarea>
+
+    <label>3. Pontos fortes</label>
+    <textarea id="edit-pontos-fortes" rows="2" placeholder="O que foi bem? Quais aprendizados foram mais significativos?" style="margin-bottom:12px"></textarea>
+
+    <label>4. Pontos fracos e desafios</label>
+    <textarea id="edit-pontos-fracos" rows="2" placeholder="Quais dificuldades? O que poderia ter sido melhor?" style="margin-bottom:12px"></textarea>
+
+    <label>5. O que preciso aprender</label>
+    <textarea id="edit-aprender" rows="2" placeholder="Quais conhecimentos ou habilidades preciso desenvolver?" style="margin-bottom:12px"></textarea>
+
+    <label>6. Situação ou caso para relatar</label>
+    <textarea id="edit-caso" rows="2" placeholder="Situação de aprendizado, algum caso ou atendimento..." style="margin-bottom:12px"></textarea>
+
+    <label>7. Intercorrências</label>
+    <textarea id="edit-intercorrencias" rows="2" placeholder="Situações não previstas que ocorreram..." style="margin-bottom:14px"></textarea>
+
     <div style="display:flex;gap:10px">
       <button class="btn btn-ghost" onclick="fecharModalEdicao()">Cancelar</button>
       <button class="btn btn-primary" onclick="confirmarEdicao()">Salvar edição</button>
@@ -621,6 +662,7 @@ let escala = JSON.parse(localStorage.getItem(ESCALA_KEY) || 'null') || [
   { dia:'Quinta',  entrada:'08:00', saida:'12:00', ativo:true  },
   { dia:'Sexta',   entrada:'08:00', saida:'12:00', ativo:true  },
   { dia:'Sábado',  entrada:'08:00', saida:'12:00', ativo:false },
+  { dia:'Domingo', entrada:'08:00', saida:'12:00', ativo:false },
 ];
 let registrosHoje    = null;
 let modalDataPendente = null;
@@ -891,24 +933,40 @@ function fecharModalSaida() {
 }
 
 async function confirmarSaida() {
-  const ativ = document.getElementById('modal-ativ-saida').value.trim();
-  if (!ativ) { document.getElementById('modal-ativ-erro').style.display = 'block'; return; }
-  document.getElementById('modal-ativ-erro').style.display = 'none';
-
-  // Usa a hora capturada no clique do botão, não a hora atual
   const hora = horaSaidaCapturada;
   const data = dataHoje();
   fecharModalSaida();
   toast('Registrando saída...');
 
-  await api({ action:'salvarAtividades', data, atividades: ativ });
+  // Coleta todos os campos — todos opcionais
+  const campos = {
+    atividades:      document.getElementById('modal-ativ-saida').value.trim(),
+    temas:           document.getElementById('modal-temas').value.trim(),
+    pontosFortes:    document.getElementById('modal-pontos-fortes').value.trim(),
+    pontosFracos:    document.getElementById('modal-pontos-fracos').value.trim(),
+    aprender:        document.getElementById('modal-aprender').value.trim(),
+    caso:            document.getElementById('modal-caso').value.trim(),
+    intercorrencias: document.getElementById('modal-intercorrencias').value.trim(),
+  };
+
+  // Salva cada campo que foi preenchido
+  if (campos.atividades)      await api({ action:'salvarAtividades',      data, atividades:      campos.atividades });
+  if (campos.temas)           await api({ action:'salvarCampo',           data, campo:'temas',           valor: campos.temas });
+  if (campos.pontosFortes)    await api({ action:'salvarCampo',           data, campo:'pontos_fortes',   valor: campos.pontosFortes });
+  if (campos.pontosFracos)    await api({ action:'salvarCampo',           data, campo:'pontos_fracos',   valor: campos.pontosFracos });
+  if (campos.aprender)        await api({ action:'salvarCampo',           data, campo:'aprender',        valor: campos.aprender });
+  if (campos.caso)            await api({ action:'salvarCampo',           data, campo:'caso',            valor: campos.caso });
+  if (campos.intercorrencias) await api({ action:'salvarCampo',           data, campo:'intercorrencias', valor: campos.intercorrencias });
+
   const res = await api({ action:'salvarSaida', data, hora });
   if (res.error) { toast('❌ Erro: ' + res.error); return; }
 
   toast(`✅ Saída registrada às ${hora}`);
-  if (!registrosHoje) registrosHoje = { data, entrada:'', saida:'', horas:0, atividades:'', justificativa:'', status:'' };
-  registrosHoje.saida = hora; registrosHoje.horas = res.horas||0;
-  registrosHoje.status = 'completo'; registrosHoje.atividades = ativ;
+  if (!registrosHoje) registrosHoje = { data, entrada:'', saida:'', horas:0, atividades:'', status:'' };
+  registrosHoje.saida  = hora;
+  registrosHoje.horas  = res.horas || 0;
+  registrosHoje.status = 'completo';
+  Object.assign(registrosHoje, campos);
   const idx = registrosTodos.findIndex(r => r.data === data);
   if (idx >= 0) registrosTodos[idx] = { ...registrosTodos[idx], ...registrosHoje };
   else registrosTodos.push(registrosHoje);
@@ -919,13 +977,19 @@ async function confirmarSaida() {
 // ══════════════════════════════════════════════════
 // EDIÇÃO DE REGISTRO
 // ══════════════════════════════════════════════════
-function abrirEdicao(dataStr, entrada, saida, atividades) {
+function abrirEdicao(dataStr, entrada, saida, atividades, temas, pontosFortes, pontosFracos, aprender, caso, intercorrencias) {
   modalEditData = dataStr;
   const [a,m,d] = dataStr.split('-');
   document.getElementById('modal-edit-data-txt').textContent = `Editando registro de ${d}/${m}/${a}`;
-  document.getElementById('edit-entrada').value   = entrada   || '';
-  document.getElementById('edit-saida').value     = saida     || '';
-  document.getElementById('edit-atividades').value = atividades || '';
+  document.getElementById('edit-entrada').value          = entrada          || '';
+  document.getElementById('edit-saida').value            = saida            || '';
+  document.getElementById('edit-atividades').value       = atividades       || '';
+  document.getElementById('edit-temas').value            = temas            || '';
+  document.getElementById('edit-pontos-fortes').value    = pontosFortes     || '';
+  document.getElementById('edit-pontos-fracos').value    = pontosFracos     || '';
+  document.getElementById('edit-aprender').value         = aprender         || '';
+  document.getElementById('edit-caso').value             = caso             || '';
+  document.getElementById('edit-intercorrencias').value  = intercorrencias  || '';
   document.getElementById('modal-edicao').classList.add('open');
 }
 
@@ -935,29 +999,25 @@ function fecharModalEdicao() {
 }
 
 async function confirmarEdicao() {
-  const entrada    = document.getElementById('edit-entrada').value.trim();
-  const saida      = document.getElementById('edit-saida').value.trim();
-  const atividades = document.getElementById('edit-atividades').value.trim();
-
-  if (!entrada && !saida && !atividades) { toast('Preencha ao menos um campo'); return; }
+  const entrada          = document.getElementById('edit-entrada').value.trim();
+  const saida            = document.getElementById('edit-saida').value.trim();
+  const atividades       = document.getElementById('edit-atividades').value.trim();
+  const temas            = document.getElementById('edit-temas').value.trim();
+  const pontosFortes     = document.getElementById('edit-pontos-fortes').value.trim();
+  const pontosFracos     = document.getElementById('edit-pontos-fracos').value.trim();
+  const aprender         = document.getElementById('edit-aprender').value.trim();
+  const caso             = document.getElementById('edit-caso').value.trim();
+  const intercorrencias  = document.getElementById('edit-intercorrencias').value.trim();
 
   const dataEdit = modalEditData;
   fecharModalEdicao();
   toast('Salvando edição...');
 
-  // Uma única chamada que SOBRESCREVE os campos na linha existente
-  const res = await api({
-    action:     'editarRegistro',
-    data:       dataEdit,
-    entrada:    entrada,
-    saida:      saida,
-    atividades: atividades,
-  });
+  const res = await api({ action:'editarRegistro', data:dataEdit, entrada, saida, atividades, temas, pontos_fortes:pontosFortes, pontos_fracos:pontosFracos, aprender, caso, intercorrencias });
 
   if (res.error) { toast('❌ Erro: ' + res.error); return; }
 
   toast('✅ Registro atualizado!');
-  // Invalida cache para forçar busca atualizada
   localStorage.removeItem('ponto_registros');
   registrosTodos = [];
   await carregarHistorico();
@@ -1107,6 +1167,7 @@ function _renderRelatorio(ini, fim, todos) {
   }
   lista.innerHTML = regs.slice().reverse().map(r => {
     const [a,m,d] = r.data.split('-');
+    const esc = (s) => (s||'').replace(/`/g,"'");
     return `<div class="hist-item">
       <div class="hist-date">${d}/${m}</div>
       <div class="hist-info">
@@ -1115,7 +1176,7 @@ function _renderRelatorio(ini, fim, todos) {
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
         <div class="hist-horas" style="color:var(--accent2)">${formatHoras(r.horas)}</div>
-        <button class="edit-btn" onclick="abrirEdicao('${r.data}','${r.entrada}','${r.saida}',\`${(r.atividades||'').replace(/`/g,"'")}\`)">✏️</button>
+        <button class="edit-btn" onclick="abrirEdicao('${r.data}',\`${esc(r.entrada)}\`,\`${esc(r.saida)}\`,\`${esc(r.atividades)}\`,\`${esc(r.temas)}\`,\`${esc(r.pontosFortes)}\`,\`${esc(r.pontosFracos)}\`,\`${esc(r.aprender)}\`,\`${esc(r.caso)}\`,\`${esc(r.intercorrencias)}\`)">✏️</button>
       </div>
     </div>`;
   }).join('');
@@ -1184,6 +1245,7 @@ function _renderHistorico(todos) {
     const [a,m,d] = r.data.split('-');
     const cls   = r.status==='completo'?'ok':r.status==='em_andamento'?'warn':'idle';
     const label = r.status==='completo'?'Completo':r.status==='em_andamento'?'Em andamento':r.justificativa?'Justificado':'Sem registro';
+    const esc = (s) => (s||'').replace(/`/g,"'");
     return `<div class="hist-item">
       <div class="hist-date">${d}/${m}/${a.slice(2)}</div>
       <div class="hist-info">
@@ -1194,7 +1256,7 @@ function _renderHistorico(todos) {
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
         <div class="hist-horas">${r.horas>0?formatHoras(r.horas):'-'}</div>
-        <button class="edit-btn" onclick="abrirEdicao('${r.data}','${r.entrada}','${r.saida}',\`${(r.atividades||'').replace(/`/g,"'")}\`)">✏️</button>
+        <button class="edit-btn" onclick="abrirEdicao('${r.data}',\`${esc(r.entrada)}\`,\`${esc(r.saida)}\`,\`${esc(r.atividades)}\`,\`${esc(r.temas)}\`,\`${esc(r.pontosFortes)}\`,\`${esc(r.pontosFracos)}\`,\`${esc(r.aprender)}\`,\`${esc(r.caso)}\`,\`${esc(r.intercorrencias)}\`)">✏️</button>
       </div>
     </div>`;
   }).join('');
