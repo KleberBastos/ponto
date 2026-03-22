@@ -472,10 +472,41 @@ document.addEventListener('DOMContentLoaded', () => {
   else           iniciarApp();
 });
 
-function iniciarApp() {
+async function iniciarApp() {
   document.getElementById('app').style.display = 'block';
   document.getElementById('setup-screen').style.display = 'none';
-  atualizarHeader(); startClock(); carregarHome(); registrarSW();
+  atualizarHeader(); startClock(); registrarSW();
+  // Sincroniza config e escala da planilha antes de renderizar
+  await sincronizarDaPlanilha();
+  carregarHome();
+}
+
+async function sincronizarDaPlanilha() {
+  // Puxa config (nome, meta)
+  try {
+    const resCfg = await api({ action:'getConfig' });
+    if (resCfg.config && !resCfg.error) {
+      if (resCfg.config.nome && resCfg.config.nome !== 'Estagiária') {
+        cfg.nome = resCfg.config.nome;
+        localStorage.setItem('ponto_nome', cfg.nome);
+      }
+      const metaPlani = parseFloat(resCfg.config.meta_horas);
+      if (metaPlani && metaPlani !== 500) {
+        cfg.meta = metaPlani;
+        localStorage.setItem('ponto_meta', cfg.meta);
+      }
+      atualizarHeader();
+    }
+  } catch(e) {}
+
+  // Puxa escala
+  try {
+    const resEsc = await api({ action:'getEscala' });
+    if (resEsc.escala && resEsc.escala.length && !resEsc.error) {
+      escala = resEsc.escala;
+      localStorage.setItem(ESCALA_KEY, JSON.stringify(escala));
+    }
+  } catch(e) {}
 }
 
 function salvarSetup() {
@@ -679,18 +710,22 @@ async function confirmarEdicao() {
 
   if (!entrada && !saida && !atividades) { toast('Preencha ao menos um campo'); return; }
 
-  toast('Salvando edição...');
+  const dataEdit = modalEditData;
   fecharModalEdicao();
+  toast('Salvando edição...');
 
-  // Salva cada campo que foi preenchido
-  if (atividades) await api({ action:'salvarAtividades', data: modalEditData, atividades });
-  if (entrada || saida) {
-    if (entrada) await api({ action:'salvarEntrada', data: modalEditData, hora: entrada });
-    if (saida)   await api({ action:'salvarSaida',   data: modalEditData, hora: saida });
-  }
+  // Uma única chamada que SOBRESCREVE os campos na linha existente
+  const res = await api({
+    action:     'editarRegistro',
+    data:       dataEdit,
+    entrada:    entrada,
+    saida:      saida,
+    atividades: atividades,
+  });
+
+  if (res.error) { toast('❌ Erro: ' + res.error); return; }
 
   toast('✅ Registro atualizado!');
-  // Recarrega listas
   await carregarHistorico();
   const ini = document.getElementById('rel-ini').value;
   const fim = document.getElementById('rel-fim').value;
@@ -811,11 +846,39 @@ async function carregarHistorico() {
 // ══════════════════════════════════════════════════
 // CONFIG
 // ══════════════════════════════════════════════════
-function carregarConfigScreen() {
+async function carregarConfigScreen() {
+  // Preenche com o que está em memória enquanto busca da planilha
   document.getElementById('cfg-nome').value = cfg.nome || '';
   document.getElementById('cfg-meta').value = cfg.meta || '';
   document.getElementById('cfg-url').value  = cfg.url  || '';
   renderEscala();
+
+  // Busca dados atualizados da planilha
+  try {
+    const resCfg = await api({ action:'getConfig' });
+    if (resCfg.config && !resCfg.error) {
+      if (resCfg.config.nome) {
+        cfg.nome = resCfg.config.nome;
+        localStorage.setItem('ponto_nome', cfg.nome);
+        document.getElementById('cfg-nome').value = cfg.nome;
+      }
+      const metaPlani = parseFloat(resCfg.config.meta_horas);
+      if (metaPlani) {
+        cfg.meta = metaPlani;
+        localStorage.setItem('ponto_meta', cfg.meta);
+        document.getElementById('cfg-meta').value = cfg.meta;
+      }
+    }
+  } catch(e) {}
+
+  try {
+    const resEsc = await api({ action:'getEscala' });
+    if (resEsc.escala && resEsc.escala.length && !resEsc.error) {
+      escala = resEsc.escala;
+      localStorage.setItem(ESCALA_KEY, JSON.stringify(escala));
+      renderEscala(); // re-renderiza com dados da planilha
+    }
+  } catch(e) {}
 }
 
 function renderEscala() {
