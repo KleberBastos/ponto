@@ -346,6 +346,16 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
       </div>
       <button class="btn btn-primary" style="margin-top:14px" onclick="salvarEscala()">Salvar escala</button>
     </div>
+    <div class="card">
+      <div class="card-label">Relatório na planilha</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">
+        Gera (ou atualiza) a aba <strong>Relatórios</strong> diretamente no Google Sheets, com gráficos e tabelas completas.
+      </p>
+      <button class="btn btn-primary" onclick="atualizarRelatorio()" id="btn-relatorio">
+        📊 Atualizar Relatório na Planilha
+      </button>
+    </div>
+
     <div class="card" style="margin-bottom:40px">
       <div class="card-label">Notificações</div>
       <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Receba alertas quando esquecer de registrar o ponto.</p>
@@ -945,6 +955,16 @@ async function confirmarJustificativa() {
 // ══════════════════════════════════════════════════
 // SW & NOTIFICAÇÕES
 // ══════════════════════════════════════════════════
+async function atualizarRelatorio() {
+  const btn = document.getElementById('btn-relatorio');
+  btn.disabled = true;
+  btn.textContent = '⏳ Gerando relatório...';
+  const res = await api({ action:'gerarRelatorio' });
+  btn.disabled = false;
+  btn.textContent = '📊 Atualizar Relatório na Planilha';
+  toast(res.error ? '❌ Erro: '+res.error : '✅ Relatório atualizado na planilha!');
+}
+
 async function registrarSW() {
   if (!('serviceWorker' in navigator)) return;
   try { await navigator.serviceWorker.register('./sw.js'); agendarLembretes(); } catch(e) {}
