@@ -236,13 +236,14 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
   font-size: 13px; font-weight: 600;
   padding: 2px 0; white-space: nowrap;
 }
-/* inputs de hora dentro da escala — tamanho mínimo garantido */
-.escala-grid input[type=time] {
-  font-size: 14px;
-  padding: 9px 6px;
-  text-align: center;
+/* inputs de hora da escala — campo de texto simples HH:MM, sem picker nativo */
+.hora-input {
+  font-size: 15px !important;
+  font-family: 'DM Mono', monospace !important;
+  padding: 9px 4px !important;
+  text-align: center !important;
   min-width: 0; width: 100%;
-  letter-spacing: 0;
+  letter-spacing: 1px;
 }
 /* toggle */
 .escala-toggle {
@@ -463,6 +464,24 @@ label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px
   </nav>
 </div>
 
+<!-- Modal atividades (obrigatório na saída) -->
+<div class="modal-overlay" id="modal-saida">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🏁 Registrar saída</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px">
+      Antes de registrar a saída, descreva as atividades que você realizou hoje.
+    </p>
+    <label>O que você fez hoje? <span style="color:var(--red)">*</span></label>
+    <textarea id="modal-ativ-saida" rows="3" placeholder="Ex: Atendimento ao público, organização de arquivos..." style="margin-bottom:6px"></textarea>
+    <p id="modal-ativ-erro" style="font-size:12px;color:var(--red);margin-bottom:12px;display:none">Por favor, descreva as atividades antes de registrar a saída.</p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" onclick="fecharModalSaida()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarSaida()">Registrar saída</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal justificativa -->
 <div class="modal-overlay" id="modal-justificativa">
   <div class="modal">
@@ -653,22 +672,64 @@ async function verificarPendentes() {
 // PONTO
 // ══════════════════════════════════════════════════
 async function registrarPonto(tipo) {
+  if (tipo === 'saida') {
+    // Abre modal obrigatório de atividades antes de registrar saída
+    const ativAtual = document.getElementById('atividades-txt').value.trim();
+    document.getElementById('modal-ativ-saida').value = '';
+    if (ativAtual) document.getElementById('modal-ativ-saida').value = ativAtual;
+    document.getElementById('modal-ativ-erro').style.display = 'none';
+    document.getElementById('modal-saida').classList.add('open');
+    return;
+  }
+  await _registrarEntrada();
+}
+
+function fecharModalSaida() {
+  document.getElementById('modal-saida').classList.remove('open');
+}
+
+async function confirmarSaida() {
+  const ativ = document.getElementById('modal-ativ-saida').value.trim();
+  if (!ativ) {
+    document.getElementById('modal-ativ-erro').style.display = 'block';
+    return;
+  }
+  document.getElementById('modal-ativ-erro').style.display = 'none';
+  fecharModalSaida();
+
   const hora = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
   const data = dataHoje();
-  toast(`Registrando ${tipo}...`);
-  const res = await api({ action: tipo==='entrada'?'salvarEntrada':'salvarSaida', data, hora });
+  toast('Registrando saída...');
+
+  // Salva atividades primeiro
+  await api({ action:'salvarAtividades', data, atividades: ativ });
+  // Depois registra saída
+  const res = await api({ action:'salvarSaida', data, hora });
   if (res.error) { toast('❌ Erro: ' + res.error); return; }
-  toast(`✅ ${tipo==='entrada'?'Entrada':'Saída'} registrada às ${hora}`);
+
+  toast(`✅ Saída registrada às ${hora}`);
+  // Atualiza campo de atividades e limpa
+  document.getElementById('atividades-txt').value = '';
+
   if (!registrosHoje) registrosHoje = { data, entrada:'', saida:'', horas:0, atividades:'', justificativa:'', status:'' };
-  if (tipo === 'entrada') {
-    registrosHoje.entrada = hora; registrosHoje.status = 'em_andamento';
-  } else {
-    registrosHoje.saida = hora; registrosHoje.horas = res.horas||0; registrosHoje.status = 'completo';
-    const idx = registrosTodos.findIndex(r => r.data === data);
-    if (idx >= 0) registrosTodos[idx] = { ...registrosTodos[idx], ...registrosHoje };
-    else registrosTodos.push(registrosHoje);
-    atualizarProgress();
-  }
+  registrosHoje.saida = hora; registrosHoje.horas = res.horas||0;
+  registrosHoje.status = 'completo'; registrosHoje.atividades = ativ;
+  const idx = registrosTodos.findIndex(r => r.data === data);
+  if (idx >= 0) registrosTodos[idx] = { ...registrosTodos[idx], ...registrosHoje };
+  else registrosTodos.push(registrosHoje);
+  atualizarProgress();
+  atualizarStatusHoje();
+}
+
+async function _registrarEntrada() {
+  const hora = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+  const data = dataHoje();
+  toast('Registrando entrada...');
+  const res = await api({ action:'salvarEntrada', data, hora });
+  if (res.error) { toast('❌ Erro: ' + res.error); return; }
+  toast(`✅ Entrada registrada às ${hora}`);
+  if (!registrosHoje) registrosHoje = { data, entrada:'', saida:'', horas:0, atividades:'', justificativa:'', status:'' };
+  registrosHoje.entrada = hora; registrosHoje.status = 'em_andamento';
   atualizarStatusHoje();
 }
 
@@ -676,7 +737,11 @@ async function salvarAtividades() {
   const ativ = document.getElementById('atividades-txt').value.trim();
   if (!ativ) { toast('Escreva as atividades primeiro'); return; }
   const res = await api({ action:'salvarAtividades', data:dataHoje(), atividades:ativ });
-  toast(res.error ? '❌ Erro: '+res.error : '✅ Atividades salvas!');
+  if (res.error) { toast('❌ Erro: '+res.error); }
+  else {
+    toast('✅ Atividades salvas!');
+    document.getElementById('atividades-txt').value = '';
+  }
 }
 
 // ══════════════════════════════════════════════════
@@ -793,12 +858,12 @@ function renderEscala() {
 
     // input entrada
     const inE = document.createElement('input');
-    inE.type = 'time'; inE.id = `esc-e-${i}`; inE.value = e.entrada;
+    inE.type = 'text'; inE.id = `esc-e-${i}`; inE.value = e.entrada; inE.placeholder='HH:MM'; inE.maxLength=5; inE.className='hora-input';
     wrap.appendChild(inE);
 
     // input saída
     const inS = document.createElement('input');
-    inS.type = 'time'; inS.id = `esc-s-${i}`; inS.value = e.saida;
+    inS.type = 'text'; inS.id = `esc-s-${i}`; inS.value = e.saida; inS.placeholder='HH:MM'; inS.maxLength=5; inS.className='hora-input';
     wrap.appendChild(inS);
 
     // toggle
