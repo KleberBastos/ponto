@@ -664,6 +664,11 @@ let escala = JSON.parse(localStorage.getItem(ESCALA_KEY) || 'null') || [
   { dia:'Sábado',  entrada:'08:00', saida:'12:00', ativo:false },
   { dia:'Domingo', entrada:'08:00', saida:'12:00', ativo:false },
 ];
+// Garante que Sábado e Domingo existam mesmo em escalas salvas anteriormente
+if (!escala.find(e => e.dia === 'Sábado'))
+  escala.push({ dia:'Sábado',  entrada:'08:00', saida:'12:00', ativo:false });
+if (!escala.find(e => e.dia === 'Domingo'))
+  escala.push({ dia:'Domingo', entrada:'08:00', saida:'12:00', ativo:false });
 let registrosHoje    = null;
 let modalDataPendente = null;
 let modalEditData     = null;   // data do registro sendo editado
@@ -760,6 +765,11 @@ async function sincronizarDaPlanilha() {
   // Escala
   if (res.escala && res.escala.length) {
     escala = res.escala;
+    // Garante Sábado e Domingo mesmo em planilhas antigas
+    if (!escala.find(e => e.dia === 'Sábado'))
+      escala.push({ dia:'Sábado',  entrada:'08:00', saida:'12:00', ativo:false });
+    if (!escala.find(e => e.dia === 'Domingo'))
+      escala.push({ dia:'Domingo', entrada:'08:00', saida:'12:00', ativo:false });
     localStorage.setItem(ESCALA_KEY, JSON.stringify(escala));
   }
 
