@@ -910,8 +910,11 @@ async function registrarPonto(tipo) {
     // ⏱ Captura a hora AGORA, antes de abrir o modal
     horaSaidaCapturada = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
     document.getElementById('modal-hora-saida').textContent = horaSaidaCapturada;
-    document.getElementById('modal-ativ-saida').value = '';
-    document.getElementById('modal-ativ-erro').style.display = 'none';
+    // Limpa todos os campos
+    ['modal-ativ-saida','modal-temas','modal-pontos-fortes','modal-pontos-fracos',
+     'modal-aprender','modal-caso','modal-intercorrencias'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
     document.getElementById('modal-saida').classList.add('open');
     return;
   }
