@@ -671,9 +671,51 @@ if (!escala.find(e => e.dia === 'Domingo'))
   escala.push({ dia:'Domingo', entrada:'08:00', saida:'12:00', ativo:false });
 let registrosHoje    = null;
 let modalDataPendente = null;
-let modalEditData     = null;   // data do registro sendo editado
-let horaSaidaCapturada = null;  // ⏱ hora capturada no clique do botão saída
+let modalEditData     = null;
+let horaSaidaCapturada = null;
 let registrosTodos   = [];
+let sincronizando    = false;
+
+// Cache válido por 10 minutos
+const CACHE_TTL_MS   = 10 * 60 * 1000;
+const CACHE_TS_KEY   = 'ponto_cache_ts';
+
+function cacheEstaFresco() {
+  const ts = parseInt(localStorage.getItem(CACHE_TS_KEY) || '0');
+  return (Date.now() - ts) < CACHE_TTL_MS;
+}
+function marcarCacheAtualizado() {
+  localStorage.setItem(CACHE_TS_KEY, Date.now().toString());
+}
+function invalidarCache() {
+  localStorage.removeItem('ponto_registros');
+  localStorage.removeItem(CACHE_TS_KEY);
+  registrosTodos = [];
+}
+
+// ── Indicador sutil de sincronização ──────────────────────
+function mostrarSincIndicador() {
+  let el = document.getElementById('sinc-indicator');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'sinc-indicator';
+    el.style.cssText = `
+      position:fixed; top:calc(var(--safe-top) + 8px); right:12px; z-index:200;
+      display:flex; align-items:center; gap:5px;
+      background:rgba(124,109,250,0.15); border:1px solid rgba(124,109,250,0.3);
+      border-radius:99px; padding:4px 10px; font-size:11px; color:var(--accent2);
+      backdrop-filter:blur(8px); transition:opacity .3s;
+    `;
+    el.innerHTML = '<div class="spinner" style="width:12px;height:12px;border-width:1.5px"></div> Atualizando...';
+    document.body.appendChild(el);
+  }
+  el.style.opacity = '1';
+  el.style.display = 'flex';
+}
+function esconderSincIndicador() {
+  const el = document.getElementById('sinc-indicator');
+  if (el) { el.style.opacity = '0'; setTimeout(() => { el.style.display = 'none'; }, 300); }
+}
 
 // ══════════════════════════════════════════════════
 // LOADING
@@ -706,29 +748,24 @@ async function iniciarApp() {
   document.getElementById('app').style.display = 'block';
   atualizarHeader(); startClock(); registrarSW();
 
-  // ── Carrega cache local imediatamente (percepção instantânea) ──
   const cachedRegistros = localStorage.getItem('ponto_registros');
-  const cachedEscala    = localStorage.getItem(ESCALA_KEY);
 
   if (cachedRegistros) {
+    // Exibe cache imediatamente — zero espera
     registrosTodos = JSON.parse(cachedRegistros);
     registrosHoje  = registrosTodos.find(r => r.data === dataHoje()) || null;
     atualizarStatusHoje();
     atualizarProgress();
     verificarPendentes();
-    // Mostra o app imediatamente sem loading
     hideLoading();
-    // Atualiza em background silenciosamente
-    sincronizarDaPlanilha().then(() => {
-      registrosHoje = registrosTodos.find(r => r.data === dataHoje()) || null;
-      atualizarStatusHoje();
-      atualizarProgress();
-      verificarPendentes();
-    });
+
+    // Sincroniza em background só se cache estiver velho (>10 min)
+    if (!cacheEstaFresco()) {
+      _sincronizarBackground();
+    }
   } else {
-    // Primeiro acesso — sem cache, precisa mostrar loading
-    showLoading('Conectando à planilha...');
-    setLoadingMsg('Buscando seus dados...');
+    // Primeiro acesso — sem cache, mostra loading
+    showLoading('Buscando seus dados...');
     await sincronizarDaPlanilha();
     registrosHoje = registrosTodos.find(r => r.data === dataHoje()) || null;
     atualizarStatusHoje();
@@ -738,34 +775,35 @@ async function iniciarApp() {
   }
 }
 
+// Sincronização em background com indicador sutil
+async function _sincronizarBackground() {
+  if (sincronizando) return;
+  sincronizando = true;
+  mostrarSincIndicador();
+  await sincronizarDaPlanilha();
+  registrosHoje = registrosTodos.find(r => r.data === dataHoje()) || null;
+  atualizarStatusHoje();
+  atualizarProgress();
+  verificarPendentes();
+  esconderSincIndicador();
+  sincronizando = false;
+}
+
 async function sincronizarDaPlanilha() {
-  // Uma única chamada busca config + escala + registros de uma vez
   const res = await api({ action: 'getInicial' });
   if (res.error) return;
 
-  // Config
   if (res.config) {
-    if (res.config.nome) {
-      cfg.nome = res.config.nome;
-      localStorage.setItem('ponto_nome', cfg.nome);
-    }
+    if (res.config.nome) { cfg.nome = res.config.nome; localStorage.setItem('ponto_nome', cfg.nome); }
     const metaPlani = parseFloat(res.config.meta_horas);
-    if (metaPlani) {
-      cfg.meta = metaPlani;
-      localStorage.setItem('ponto_meta', cfg.meta);
-    }
+    if (metaPlani) { cfg.meta = metaPlani; localStorage.setItem('ponto_meta', cfg.meta); }
     const metaSem = parseFloat(res.config.meta_semanas);
-    if (metaSem) {
-      cfg.metaSemanas = metaSem;
-      localStorage.setItem('ponto_meta_semanas', cfg.metaSemanas);
-    }
+    if (metaSem) { cfg.metaSemanas = metaSem; localStorage.setItem('ponto_meta_semanas', cfg.metaSemanas); }
     atualizarHeader();
   }
 
-  // Escala
   if (res.escala && res.escala.length) {
     escala = res.escala;
-    // Garante Sábado e Domingo mesmo em planilhas antigas
     if (!escala.find(e => e.dia === 'Sábado'))
       escala.push({ dia:'Sábado',  entrada:'08:00', saida:'12:00', ativo:false });
     if (!escala.find(e => e.dia === 'Domingo'))
@@ -773,10 +811,10 @@ async function sincronizarDaPlanilha() {
     localStorage.setItem(ESCALA_KEY, JSON.stringify(escala));
   }
 
-  // Registros — já vêm junto, sem chamada extra
   if (res.registros) {
     registrosTodos = res.registros;
     localStorage.setItem('ponto_registros', JSON.stringify(registrosTodos));
+    marcarCacheAtualizado();
   }
 }
 
@@ -917,10 +955,8 @@ async function verificarPendentes() {
 // ══════════════════════════════════════════════════
 async function registrarPonto(tipo) {
   if (tipo === 'saida') {
-    // ⏱ Captura a hora AGORA, antes de abrir o modal
     horaSaidaCapturada = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
     document.getElementById('modal-hora-saida').textContent = horaSaidaCapturada;
-    // Limpa todos os campos
     ['modal-ativ-saida','modal-temas','modal-pontos-fortes','modal-pontos-fracos',
      'modal-aprender','modal-caso','modal-intercorrencias'].forEach(id => {
       document.getElementById(id).value = '';
@@ -928,16 +964,22 @@ async function registrarPonto(tipo) {
     document.getElementById('modal-saida').classList.add('open');
     return;
   }
-  // Entrada
+  // Entrada — Optimistic UI: atualiza tela ANTES de confirmar com planilha
   const hora = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
   const data = dataHoje();
-  toast('Registrando entrada...');
-  const res = await api({ action:'salvarEntrada', data, hora });
-  if (res.error) { toast('❌ Erro: ' + res.error); return; }
-  toast(`✅ Entrada registrada às ${hora}`);
   if (!registrosHoje) registrosHoje = { data, entrada:'', saida:'', horas:0, atividades:'', justificativa:'', status:'' };
   registrosHoje.entrada = hora; registrosHoje.status = 'em_andamento';
-  atualizarStatusHoje();
+  atualizarStatusHoje(); // atualiza imediatamente
+  toast(`✅ Entrada registrada às ${hora}`);
+  // Envia para planilha em background
+  const res = await api({ action:'salvarEntrada', data, hora });
+  if (res.error) {
+    toast('❌ Erro ao salvar — tente novamente');
+    registrosHoje.entrada = ''; registrosHoje.status = '';
+    atualizarStatusHoje();
+  } else {
+    invalidarCache(); // força rebusca na próxima sincronização
+  }
 }
 
 function fecharModalSaida() {
@@ -949,9 +991,8 @@ async function confirmarSaida() {
   const hora = horaSaidaCapturada;
   const data = dataHoje();
   fecharModalSaida();
-  toast('Registrando saída...');
 
-  // Coleta todos os campos — todos opcionais
+  // Coleta campos antes de fechar
   const campos = {
     atividades:      document.getElementById('modal-ativ-saida').value.trim(),
     temas:           document.getElementById('modal-temas').value.trim(),
@@ -962,27 +1003,36 @@ async function confirmarSaida() {
     intercorrencias: document.getElementById('modal-intercorrencias').value.trim(),
   };
 
-  // Salva cada campo que foi preenchido
-  if (campos.atividades)      await api({ action:'salvarAtividades',      data, atividades:      campos.atividades });
-  if (campos.temas)           await api({ action:'salvarCampo',           data, campo:'temas',           valor: campos.temas });
-  if (campos.pontosFortes)    await api({ action:'salvarCampo',           data, campo:'pontos_fortes',   valor: campos.pontosFortes });
-  if (campos.pontosFracos)    await api({ action:'salvarCampo',           data, campo:'pontos_fracos',   valor: campos.pontosFracos });
-  if (campos.aprender)        await api({ action:'salvarCampo',           data, campo:'aprender',        valor: campos.aprender });
-  if (campos.caso)            await api({ action:'salvarCampo',           data, campo:'caso',            valor: campos.caso });
-  if (campos.intercorrencias) await api({ action:'salvarCampo',           data, campo:'intercorrencias', valor: campos.intercorrencias });
-
-  const res = await api({ action:'salvarSaida', data, hora });
-  if (res.error) { toast('❌ Erro: ' + res.error); return; }
-
-  toast(`✅ Saída registrada às ${hora}`);
+  // Optimistic UI — atualiza tela imediatamente
   if (!registrosHoje) registrosHoje = { data, entrada:'', saida:'', horas:0, atividades:'', status:'' };
   registrosHoje.saida  = hora;
-  registrosHoje.horas  = res.horas || 0;
   registrosHoje.status = 'completo';
   Object.assign(registrosHoje, campos);
+  atualizarStatusHoje();
+  toast(`✅ Saída registrada às ${hora}`);
+
+  // Envia para planilha em background
+  if (campos.atividades)      await api({ action:'salvarAtividades', data, atividades: campos.atividades });
+  if (campos.temas)           await api({ action:'salvarCampo', data, campo:'temas',           valor: campos.temas });
+  if (campos.pontosFortes)    await api({ action:'salvarCampo', data, campo:'pontos_fortes',   valor: campos.pontosFortes });
+  if (campos.pontosFracos)    await api({ action:'salvarCampo', data, campo:'pontos_fracos',   valor: campos.pontosFracos });
+  if (campos.aprender)        await api({ action:'salvarCampo', data, campo:'aprender',        valor: campos.aprender });
+  if (campos.caso)            await api({ action:'salvarCampo', data, campo:'caso',            valor: campos.caso });
+  if (campos.intercorrencias) await api({ action:'salvarCampo', data, campo:'intercorrencias', valor: campos.intercorrencias });
+
+  const res = await api({ action:'salvarSaida', data, hora });
+  if (res.error) {
+    toast('❌ Erro ao salvar saída — tente novamente');
+    registrosHoje.saida = ''; registrosHoje.status = 'em_andamento';
+    atualizarStatusHoje();
+    return;
+  }
+
+  registrosHoje.horas = res.horas || 0;
   const idx = registrosTodos.findIndex(r => r.data === data);
   if (idx >= 0) registrosTodos[idx] = { ...registrosTodos[idx], ...registrosHoje };
   else registrosTodos.push(registrosHoje);
+  invalidarCache();
   atualizarProgress();
   atualizarStatusHoje();
 }
@@ -1031,8 +1081,7 @@ async function confirmarEdicao() {
   if (res.error) { toast('❌ Erro: ' + res.error); return; }
 
   toast('✅ Registro atualizado!');
-  localStorage.removeItem('ponto_registros');
-  registrosTodos = [];
+  invalidarCache();
   await carregarHistorico();
   const ini = document.getElementById('rel-ini').value;
   const fim = document.getElementById('rel-fim').value;
@@ -1502,13 +1551,15 @@ function irPara(s) {
   document.getElementById('nav-'+s).classList.add('active');
 
   if (s === 'home') {
-    // Sempre rebusca ao voltar para home para refletir edições
-    sincronizarDaPlanilha().then(() => {
+    // Só sincroniza se cache estiver velho, senão usa o que já tem
+    if (!cacheEstaFresco()) {
+      _sincronizarBackground();
+    } else {
       registrosHoje = registrosTodos.find(r => r.data === dataHoje()) || null;
       atualizarStatusHoje();
       atualizarProgress();
       verificarPendentes();
-    });
+    }
   }
   if (s==='relatorios') {
     if (!document.getElementById('rel-ini').value) {
